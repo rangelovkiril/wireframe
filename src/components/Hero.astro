@@ -1,0 +1,36 @@
+---
+import { profile } from "../data/zone.ts";
+---
+
+<header class="hero">
+  <h1>{profile.name}</h1>
+  <p class="tagline">{profile.tagline}</p>
+  <p class="intro">{profile.intro}</p>
+</header>
+
+<style>
+  .hero {
+    padding-block: clamp(48px, 12vw, 112px) clamp(40px, 8vw, 72px);
+  }
+  h1 {
+    font-weight: 900;
+    font-size: clamp(52px, 15vw, 112px);
+    line-height: 0.92;
+    letter-spacing: -0.035em;
+    margin: 0;
+  }
+  .tagline {
+    font-weight: 700;
+    font-size: clamp(23px, 6vw, 34px);
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    margin: 0.7em 0 0;
+    max-width: 22ch;
+  }
+  .intro {
+    font-size: clamp(17px, 2.4vw, 19px);
+    color: var(--muted);
+    margin: 1.2em 0 0;
+    max-width: 52ch;
+  }
+</style>

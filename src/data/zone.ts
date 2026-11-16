@@ -4,6 +4,18 @@
 export const ORIGIN = "rangelov.dev.";
 export const DEFAULT_TTL = 3600;
 
+export const profile = {
+  name: "Kiril Rangelov",
+  tagline: "Platform engineer in the making and internet enthusiast.",
+  intro:
+    "I mostly do platform engineering, and I care about how the internet works underneath. So I introduce myself through my own DNS zone.",
+};
+
+export const footer = {
+  built: "Built with Astro, served by GitHub Pages.",
+  dnssec: { label: "DNSSEC by deSEC", href: "https://desec.io" },
+};
+
 export type RRType =
   | "A"
   | "AAAA"

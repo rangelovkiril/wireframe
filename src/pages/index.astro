@@ -1,4 +1,11 @@
 ---
+import { Font } from "astro:assets";
+import "../styles/global.css";
+import Hero from "../components/Hero.astro";
+import Guide from "../components/Guide.astro";
+import Record from "../components/Record.astro";
+import { footer, profile, sections } from "../data/zone.ts";
+import { icons } from "../lib/icons.ts";
 ---
 
 <!doctype html>
@@ -6,11 +13,64 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Kiril Rangelov</title>
-    <meta name="description" content="Platform engineer in the making and internet enthusiast." />
+    <title>{profile.name}</title>
+    <meta name="description" content={profile.tagline} />
     <link rel="canonical" href={Astro.site} />
+    <Font cssVariable="--font-hanken" preload />
+    <Font cssVariable="--font-sometype" preload />
   </head>
   <body>
-    <h1>Kiril Rangelov</h1>
+    <div class="page">
+      <Hero />
+      <main>
+        <Guide />
+        <section class="records" aria-label="Records of rangelov.dev">
+          {sections.map((section) => <Record section={section} open={section.group === "soa"} />)}
+        </section>
+      </main>
+      <footer class="footer">
+        <p>{footer.built}</p>
+        <a href={footer.dnssec.href}>
+          <svg
+            viewBox="0 0 24 24"
+            width="20"
+            height="20"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.6"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+            set:html={icons.umbrella}
+          />
+          {footer.dnssec.label}
+        </a>
+      </footer>
+    </div>
   </body>
 </html>
+
+<style>
+  .records {
+    border-bottom: 1px solid var(--line);
+  }
+  .footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 24px;
+    padding-block: 32px 48px;
+    color: var(--muted);
+    font-size: 15px;
+  }
+  .footer p {
+    margin: 0;
+  }
+  .footer a {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    color: var(--muted);
+  }
+</style>

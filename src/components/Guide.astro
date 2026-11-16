@@ -1,0 +1,126 @@
+---
+import { guide } from "../data/guide.ts";
+
+// Filtering is plain CSS: a checked radio hides every record of another type.
+const filterCss = guide.rows
+  .map((row) => {
+    const keep = row.types.map((t) => `[data-type="${t}"]`).join(", ");
+    return `body:has(#f-${row.id}:checked) .record:not(${keep}) { display: none; }`;
+  })
+  .join("\n");
+---
+
+<section class="guide" aria-labelledby="guide-heading">
+  <h2 id="guide-heading">{guide.heading}</h2>
+  <p class="lead">{guide.intro}</p>
+
+  <fieldset>
+    <legend class="visually-hidden">Show only records of one type</legend>
+    {
+      guide.rows.map((row) => (
+        <label class="row" style={`--c: var(--t-${row.types[0]})`}>
+          <input type="radio" name="filter" id={`f-${row.id}`} value={row.id} />
+          <span class="type">{row.label}</span>
+          <span class="means">{row.means}</span>
+          <span class="here">{row.here}</span>
+        </label>
+      ))
+    }
+    <label class="show-all">
+      <input type="radio" name="filter" id="f-all" value="all" checked />
+      <span>{guide.showAll}</span>
+    </label>
+  </fieldset>
+</section>
+
+<style is:inline set:html={filterCss}></style>
+
+<style>
+  .guide {
+    padding-bottom: 40px;
+  }
+  h2 {
+    font-size: clamp(26px, 6vw, 36px);
+    font-weight: 800;
+    letter-spacing: -0.015em;
+    line-height: 1.1;
+    margin: 0;
+  }
+  .lead {
+    color: var(--muted);
+    margin: 0.6em 0 20px;
+    max-width: 56ch;
+  }
+  fieldset {
+    border: 0;
+    margin: 0;
+    padding: 0;
+    min-width: 0;
+  }
+
+  input {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+    margin: 0;
+  }
+
+  .row {
+    position: relative;
+    display: grid;
+    gap: 2px;
+    padding: 12px 14px;
+    margin-inline: -14px;
+    min-height: 44px;
+    cursor: pointer;
+  }
+  .row:hover {
+    background: var(--panel);
+  }
+  .row:has(input:checked) {
+    background: var(--panel);
+    box-shadow: inset 4px 0 0 var(--c);
+  }
+  .row:has(input:focus-visible),
+  .show-all:has(input:focus-visible) {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+  }
+  .type {
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: 17px;
+    color: var(--c);
+  }
+  .here {
+    color: var(--muted);
+    font-size: 15px;
+  }
+  .here::before {
+    content: "→ " / "";
+  }
+
+  @media (min-width: 720px) {
+    .row {
+      grid-template-columns: 8.5rem 1fr 15rem;
+      align-items: baseline;
+      gap: 20px;
+    }
+  }
+
+  .show-all {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    margin-top: 8px;
+    color: var(--accent);
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .guide:not(:has(.row input:checked)) .show-all {
+    display: none;
+  }
+</style>

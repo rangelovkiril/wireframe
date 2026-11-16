@@ -27,3 +27,15 @@ export function formatRdata(r: Rdata): string {
       return `${r.preference} ${r.exchange}`;
   }
 }
+
+/** Rdata as printed in the record line on the page: SOA without its timers, DNSKEY without the key. */
+export function displayRdata(r: Rdata): string {
+  switch (r.type) {
+    case "SOA":
+      return `${r.mname} ${r.rname} ${r.serial}`;
+    case "DNSKEY":
+      return `${r.flags} ${r.protocol} ${r.algorithm} ( … )`;
+    default:
+      return formatRdata(r);
+  }
+}

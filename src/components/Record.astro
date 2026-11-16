@@ -1,0 +1,402 @@
+---
+import { ORIGIN, type Section } from "../data/zone.ts";
+import { displayRdata } from "../lib/zonefile.ts";
+import { icons } from "../lib/icons.ts";
+
+interface Props {
+  section: Section;
+  open?: boolean;
+}
+
+const { section, open = false } = Astro.props;
+const [first] = section.records;
+if (!first) throw new Error(`section ${section.id} has no records`);
+const type = first.rdata.type;
+const c = section.content;
+// Owner split after each label, with the zone name kept whole, so a long
+// name only wraps between labels.
+const sub = first.owner === ORIGIN ? "" : first.owner.slice(0, -ORIGIN.length);
+const labels = [...(sub.match(/[^.]*\./g) ?? []), ORIGIN];
+const host = (href: string) => href.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
+---
+
+<details class="record" id={section.id} data-type={type} style={`--c: var(--t-${type})`} open={open}>
+  <summary>
+    <span class="line1">
+      <span class="owner">{labels.map((l) => <span class="label">{l}</span>)}</span>
+      <span class="marker" aria-hidden="true"></span>
+    </span>
+    <span class="line2">
+      <span class="class"><span class="ttl">{first.ttl} IN</span> <span class="type">{type}</span></span>
+      <span class="rdata">{displayRdata(first.rdata)}</span>
+    </span>
+  </summary>
+
+  <div class="content">
+    {c.kind === "prose" && (
+      <>
+        <h2>{c.title}</h2>
+        <p class="prose">{c.text}</p>
+      </>
+    )}
+
+    {c.kind === "randomart" && <slot name="randomart" />}
+
+    {c.kind === "skills" && (
+      <>
+        <h2>{c.title}</h2>
+        <p class="note">{c.note}</p>
+        <ul class="skills">
+          {c.items.map((s) => (
+            <li>
+              <span class="label">{s.label}</span>
+              <span class="weight">{s.weight}</span>
+              <span class="bar" style={`--w: ${s.weight}%`} aria-hidden="true" />
+            </li>
+          ))}
+        </ul>
+      </>
+    )}
+
+    {c.kind === "certs" && (
+      <>
+        <h2>{c.title}</h2>
+        <ul class="certs">
+          {c.items.map((cert) => (
+            <li>
+              <span class="issuer">{cert.issuer}</span>
+              <span class="course">{cert.course}</span>
+              <span class="when">{cert.when}</span>
+            </li>
+          ))}
+        </ul>
+      </>
+    )}
+
+    {c.kind === "project" && (
+      <div class="project">
+        <div class="project-head">
+          {c.logo ? (
+            <img class:list={["logo", { wide: c.logo.includes("devops") }]} src={c.logo} alt={c.logoAlt ?? ""} />
+          ) : (
+            c.icon && (
+              <svg
+                class="icon"
+                viewBox="0 0 24 24"
+                width="32"
+                height="32"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+                set:html={icons[c.icon]}
+              />
+            )
+          )}
+          <h2>{c.title}</h2>
+        </div>
+        <p>{c.text}</p>
+        {c.award && (
+          <p class="award">
+            <span class="award-label">Award</span> {c.award}
+          </p>
+        )}
+        {c.links.length > 0 && (
+          <ul class="links">
+            {c.links.map((l) => (
+              <li>
+                <a href={l.href}>{l.label}</a>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    )}
+
+    {c.kind === "list" && (
+      <>
+        <h2>{c.title}</h2>
+        <ul class="list">
+          {c.items.map((item) => (
+            <li>{item}</li>
+          ))}
+        </ul>
+      </>
+    )}
+
+    {c.kind === "contact" && (
+      <>
+        <h2>{c.title}</h2>
+        <a class="email" href={`mailto:${c.email}`}>{c.email}</a>
+        <ul class="contact">
+          {c.links.map((l) => (
+            <li>
+              <a href={l.href}>
+                <span class="name">{l.label}</span>
+                <span class="host">{host(l.href)}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </>
+    )}
+  </div>
+</details>
+
+<style>
+  .record {
+    border-top: 1px solid var(--line);
+    padding-block: 28px;
+  }
+
+  summary {
+    display: block;
+    list-style: none;
+    cursor: pointer;
+    font-family: var(--mono);
+    font-size: clamp(17px, 4.6vw, 24px);
+    line-height: 1.35;
+  }
+  summary::-webkit-details-marker {
+    display: none;
+  }
+  summary:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 4px;
+  }
+
+  .line1 {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    min-height: 44px;
+    align-items: center;
+  }
+  .owner {
+    font-weight: 700;
+    min-width: 0;
+  }
+  .owner .label {
+    display: inline-block;
+    white-space: nowrap;
+  }
+  .marker {
+    margin-left: auto;
+    flex: none;
+    width: 1ch;
+    text-align: center;
+    color: var(--muted);
+  }
+  .marker::before {
+    content: "+";
+  }
+  .record[open] .marker::before {
+    content: "−";
+  }
+
+  .line2 {
+    display: block;
+    color: var(--muted);
+  }
+  .class {
+    white-space: nowrap;
+    margin-right: 0.5ch;
+  }
+  .type {
+    font-weight: 700;
+    color: var(--c);
+  }
+  .rdata {
+    overflow-wrap: anywhere;
+  }
+
+  .content {
+    margin-top: 20px;
+    padding-left: 18px;
+    border-left: 3px solid var(--line);
+  }
+  .content > :first-child,
+  .project > :first-child {
+    margin-top: 0;
+  }
+  .content :last-child {
+    margin-bottom: 0;
+  }
+
+  h2 {
+    font-size: clamp(22px, 5vw, 28px);
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+    margin: 0 0 12px;
+  }
+  .prose {
+    max-width: 62ch;
+  }
+  .note {
+    color: var(--muted);
+    margin: 0 0 16px;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .skills {
+    display: grid;
+    gap: 12px;
+    max-width: 520px;
+  }
+  .skills li {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 4px 12px;
+  }
+  .weight {
+    font-family: var(--mono);
+    font-weight: 700;
+    color: var(--c);
+  }
+  .bar {
+    grid-column: 1 / -1;
+    height: 4px;
+    background: var(--surface);
+  }
+  .bar::before {
+    content: "";
+    display: block;
+    height: 100%;
+    width: var(--w);
+    background: var(--c);
+  }
+
+  .certs {
+    display: grid;
+    gap: 14px;
+  }
+  .certs li {
+    display: grid;
+  }
+  .issuer {
+    font-size: 15px;
+    color: var(--muted);
+  }
+  .course {
+    font-weight: 700;
+  }
+  .when {
+    color: var(--muted);
+    font-size: 15px;
+  }
+
+  .project-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 12px;
+  }
+  .project-head h2 {
+    margin: 0;
+  }
+  .icon {
+    flex: none;
+    color: var(--c);
+  }
+  .logo {
+    flex: none;
+    height: 44px;
+    width: auto;
+  }
+  .logo.wide {
+    height: 64px;
+  }
+  /* The DevOps Club wordmark is the light-background version. */
+  @media (prefers-color-scheme: dark) {
+    .logo.wide {
+      background: #f4f4f2;
+      padding: 6px 10px;
+    }
+  }
+  .project p {
+    max-width: 62ch;
+    margin: 0 0 12px;
+  }
+  .award-label {
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: 0.85em;
+    color: var(--c);
+    margin-right: 0.5ch;
+  }
+
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 24px;
+  }
+  .links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-weight: 700;
+  }
+  .links a::after {
+    content: " →" / "";
+    white-space: pre;
+  }
+
+  .list {
+    display: grid;
+    gap: 10px;
+    max-width: 62ch;
+  }
+  .list li {
+    padding-left: 1.4em;
+    text-indent: -1.4em;
+  }
+  .list li::before {
+    content: "·" / "";
+    display: inline-block;
+    width: 1.4em;
+    text-indent: 0;
+    color: var(--c);
+    font-weight: 900;
+  }
+
+  .email {
+    display: inline-block;
+    font-size: clamp(24px, 7vw, 40px);
+    font-weight: 800;
+    letter-spacing: -0.015em;
+    overflow-wrap: anywhere;
+    padding-block: 4px;
+  }
+  .contact {
+    display: grid;
+    gap: 6px;
+    margin-top: 12px;
+  }
+  .contact a {
+    display: inline-grid;
+    min-height: 44px;
+    align-content: center;
+    text-decoration: none;
+  }
+  .contact .name {
+    font-weight: 700;
+    text-decoration: underline;
+  }
+  .contact .name::after {
+    content: " →" / "";
+    white-space: pre;
+  }
+  .host {
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 15px;
+  }
+</style>
