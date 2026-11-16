@@ -185,9 +185,9 @@ Icons: simple 24×24 inline stroke SVGs (currentColor, stroke 1.6).
 
 The email address has a plain envelope icon. Every link to codeberg.org,
 github.com or linkedin.com has that site's logo on its left
-(`components/LinkLogo.astro`; LinkedIn appears once its official "in" logo is
-saved as `public/logos/linkedin.svg`, optional `linkedin-white.svg`, at 21px,
-LinkedIn's minimum), in the official light/dark
+(`components/LinkLogo.astro`; LinkedIn's is the official "in" logo from
+brand.linkedin.com, `assets/logos/linkedin.png` and `linkedin-white.png`,
+unmodified and 21px high, LinkedIn's minimum), in the official light/dark
 variants and otherwise unmodified: Codeberg's is CC0 (trademark of Codeberg
 e.V.), GitHub's is the MIT-licensed octicons mark, used as a link to a
 repository as github.com/logos allows. License notes are inside the SVGs.

@@ -1,9 +1,10 @@
 ---
 // The logo of the site a link points to (Codeberg, GitHub, LinkedIn), in the
-// official light/dark variants from public/logos/; nothing for other links or
-// when the file is missing. Decorative: the link text names the site.
-import { existsSync } from "node:fs";
-import { join } from "node:path";
+// official light/dark variants; nothing for other links. Decorative: the link
+// text names the site. Codeberg and GitHub are SVGs in public/logos/; the
+// LinkedIn "in" logo is the official PNG in assets/logos/, scaled at build time.
+import type { ImageMetadata } from "astro";
+import { getImage } from "astro:assets";
 
 interface Props {
   href: string;
@@ -16,28 +17,45 @@ const sites: Record<string, string> = {
   "linkedin.com": "linkedin",
 };
 const name = sites[new URL(Astro.props.href).hostname];
-const has = (file: string) => existsSync(join(process.cwd(), "public", "logos", file));
-const light = name && has(`${name}.svg`) ? `/logos/${name}.svg` : undefined;
-const dark = name && has(`${name}-white.svg`) ? `/logos/${name}-white.svg` : undefined;
+
+const rasters = import.meta.glob<{ default: ImageMetadata }>("../assets/logos/linkedin*.png", { eager: true });
+const raster = async (file: string) => {
+  const img = rasters[`../assets/logos/${file}`]?.default;
+  if (!img) throw new Error(`${file} not found in assets/logos/`);
+  // 21px: LinkedIn's minimum size on screen
+  const out = await getImage({ src: img, height: 21, densities: [1, 2, 3], format: "webp" });
+  return { src: out.src, srcset: out.srcSet.attribute };
+};
+
+let light: { src: string; srcset?: string } | undefined;
+let dark: { src: string; srcset?: string } | undefined;
+if (name === "linkedin") {
+  light = await raster("linkedin.png");
+  dark = await raster("linkedin-white.png");
+} else if (name) {
+  light = { src: `/logos/${name}.svg` };
+  dark = { src: `/logos/${name}-white.svg` };
+}
 ---
 
 {
   light && (
     <picture>
-      {dark && <source srcset={dark} media="(prefers-color-scheme: dark)" />}
-      <img class="site-logo" src={light} alt="" width="21" height="21" />
+      {dark && <source srcset={dark.srcset ?? dark.src} media="(prefers-color-scheme: dark)" />}
+      <img class="site-logo" src={light.src} srcset={light.srcset} alt="" height="21" />
     </picture>
   )
 }
 
 <style>
+  /* same box for every logo (the LinkedIn one is wider, with its ®), so the link texts line up */
   picture {
     display: flex;
     flex: none;
+    width: 25px;
   }
-  /* 21px: LinkedIn's minimum on screen */
   .site-logo {
-    width: 21px;
     height: 21px;
+    width: auto;
   }
 </style>
