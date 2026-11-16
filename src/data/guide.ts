@@ -14,6 +14,7 @@ export interface GuideRow {
 export const guide = {
   heading: "What the records mean",
   intro: "Each section below is a DNS record of rangelov.dev. Tap a record to open it, or tap a type to see only those.",
+  verifyNote: "The verify button next to a record asks a public DNS resolver whether that record is really published, and signed with DNSSEC.",
   showAll: "Show all records",
   openAll: "Open all records",
   closeAll: "Close all records",

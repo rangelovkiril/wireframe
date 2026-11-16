@@ -42,7 +42,6 @@ const host = (href: string) => href.replace(/^https?:\/\/(www\.)?/, "").replace(
       <span class="rdata">{displayRdata(first.rdata)}</span>
     </span>
     <span class="marker" aria-hidden="true"></span>
-    <span class="verdict" aria-hidden="true"></span>
   </summary>
 
   <div class="content">
@@ -257,18 +256,7 @@ const host = (href: string) => href.replace(/^https?:\/\/(www\.)?/, "").replace(
     color: var(--muted);
     cursor: progress;
   }
-  .verdict {
-    grid-column: 1 / -1;
-    font-size: 14px;
-    color: var(--muted);
-    margin-top: 6px;
-  }
-  .verdict:empty {
-    display: none;
-  }
-  .verdict.ok {
-    color: var(--ok);
-  }
+
   .owner {
     font-weight: 700;
     min-width: 0;

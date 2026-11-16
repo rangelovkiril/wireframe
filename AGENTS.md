@@ -248,7 +248,6 @@ it never breaks in odd places on a phone:
 - row 1: fqdn (bold, text colour) with the `verify` button on the right
 - row 2: `ttl IN` (muted), TYPE (bold, type colour), rdata (muted; may wrap),
   with the `+`/`−` marker on the right
-- after a check, the verify result as a small third row
 
 Every record section starts with a 1px top rule in `--line` and ~28px of
 space, so records are clearly separated. Content sits under the record line
@@ -297,7 +296,8 @@ everything is still visible and readable.
    explanation, the raw answer from dns.google including the RRSIG, whether it
    matches the record on the page (TXT compared with its strings joined, SOA by
    its names only), and the `dig +dnssec` command to check it yourself. The
-   verdict also stays as a small row under the record.
+   result is shown only in the dialog, not under the record. The guide has one
+   sentence saying what the verify button does.
 4. **Randomart at build time.** In `randomart.ts`, fetch the zone's DNSKEY
    (flag 257) over DoH during the build, SHA-256 the key, and run the
    OpenSSH drunken-bishop walk (17×9 field, same symbols as
