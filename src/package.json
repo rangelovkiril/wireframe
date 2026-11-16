@@ -4,7 +4,8 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "typecheck": "bun check"
+    "typecheck": "bun check",
+    "export-dns": "bun scripts/export-dns.ts"
   },
   "devDependencies": {
     "@types/bun": "latest"

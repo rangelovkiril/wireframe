@@ -1,0 +1,129 @@
+[
+  {
+    "subname": "_skills._tcp",
+    "type": "SRV",
+    "ttl": 3600,
+    "records": [
+      "10 80 443 linux.rangelov.dev.",
+      "10 80 443 containers.rangelov.dev.",
+      "10 75 443 actions.rangelov.dev.",
+      "10 70 443 kubernetes.rangelov.dev.",
+      "10 70 443 gitops.rangelov.dev.",
+      "10 70 443 dns.rangelov.dev.",
+      "10 60 443 opentofu.rangelov.dev.",
+      "10 55 443 typescript.rangelov.dev.",
+      "10 50 443 bgp.rangelov.dev.",
+      "10 40 443 elixir.rangelov.dev.",
+      "10 35 443 java.rangelov.dev."
+    ]
+  },
+  {
+    "subname": "_certs",
+    "type": "CAA",
+    "ttl": 86400,
+    "records": [
+      "0 issue \"ripe.net; course=lir-fundamentals\"",
+      "0 issue \"ripe.net; course=ipv6-fundamentals\"",
+      "0 issue \"ripe.net; course=ripe-database\"",
+      "0 issue \"ripe.net; course=bgp-security\"",
+      "0 issue \"netacad.com; course=introduction-to-networks\""
+    ]
+  },
+  {
+    "subname": "protolith",
+    "type": "URI",
+    "ttl": 3600,
+    "records": [
+      "10 1 \"https://codeberg.org/protolith\""
+    ]
+  },
+  {
+    "subname": "devops",
+    "type": "CNAME",
+    "ttl": 3600,
+    "records": [
+      "devops.elsys.club."
+    ]
+  },
+  {
+    "subname": "rampme",
+    "type": "URI",
+    "ttl": 3600,
+    "records": [
+      "10 1 \"https://github.com/rangelovkiril/rampme-software\""
+    ]
+  },
+  {
+    "subname": "atlas",
+    "type": "URI",
+    "ttl": 3600,
+    "records": [
+      "10 1 \"https://codeberg.org/rangelovkiril/ripe-atlas-ports\""
+    ]
+  },
+  {
+    "subname": "lms",
+    "type": "URI",
+    "ttl": 3600,
+    "records": [
+      "10 1 \"https://github.com/rangelovkiril/lms-controller\""
+    ]
+  },
+  {
+    "subname": "card",
+    "type": "CNAME",
+    "ttl": 3600,
+    "records": [
+      "codeberg.page."
+    ]
+  },
+  {
+    "subname": "tues-web",
+    "type": "URI",
+    "ttl": 3600,
+    "records": [
+      "10 1 \"https://codeberg.org/rangelovkiril/tues-website-infra\""
+    ]
+  },
+  {
+    "subname": "miget",
+    "type": "TXT",
+    "ttl": 3600,
+    "records": [
+      "\"drone detection prototype, EDTH Sofia 2026\""
+    ]
+  },
+  {
+    "subname": "_awards",
+    "type": "TXT",
+    "ttl": 86400,
+    "records": [
+      "\"3rd place, TUES Fest\""
+    ]
+  },
+  {
+    "subname": "_hobbies",
+    "type": "TXT",
+    "ttl": 3600,
+    "records": [
+      "\"trains\" \"coffee\" \"languages\" \"music\""
+    ]
+  },
+  {
+    "subname": "_plans",
+    "type": "TXT",
+    "ttl": 3600,
+    "records": [
+      "\"gap-year\" \"own-asn\" \"kcna\" \"fellowship\""
+    ],
+    "page_ttl": 60
+  },
+  {
+    "subname": "portfolio",
+    "type": "CNAME",
+    "ttl": 3600,
+    "records": [
+      "rangelovkiril.github.io."
+    ]
+  }
+]
