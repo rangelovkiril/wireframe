@@ -1,6 +1,7 @@
 ---
 import type { ImageMetadata } from "astro";
 import { Image } from "astro:assets";
+import Forge from "./Forge.astro";
 import { ORIGIN, type Section } from "../data/zone.ts";
 import { displayRdata } from "../lib/zonefile.ts";
 import { icons } from "../lib/icons.ts";
@@ -20,10 +21,10 @@ const c = section.content;
 // name only wraps between labels.
 const sub = first.owner === ORIGIN ? "" : first.owner.slice(0, -ORIGIN.length);
 const labels = [...(sub.match(/[^.]*\./g) ?? []), ORIGIN];
-const badges = import.meta.glob<{ default: ImageMetadata }>("../assets/badges/*.png", { eager: true });
-const badge = (file: string) => {
-  const img = badges[`../assets/badges/${file}`]?.default;
-  if (!img) throw new Error(`badge ${file} not found in assets/badges/`);
+const images = import.meta.glob<{ default: ImageMetadata }>("../assets/{badges,logos}/*.png", { eager: true });
+const asset = (dir: "badges" | "logos", file: string) => {
+  const img = images[`../assets/${dir}/${file}`]?.default;
+  if (!img) throw new Error(`${file} not found in assets/${dir}/`);
   return img;
 };
 const host = (href: string) => href.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
@@ -76,7 +77,7 @@ const host = (href: string) => href.replace(/^https?:\/\/(www\.)?/, "").replace(
           {c.items.map((cert) => (
             <li>
               {cert.badge ? (
-                <Image class="badge" src={badge(cert.badge)} alt="" width={64} densities={[1, 2, 3]} format="webp" />
+                <Image class="badge" src={asset("badges", cert.badge)} alt="" width={64} densities={[1, 2, 3]} format="webp" />
               ) : (
                 <span class="badge" />
               )}
@@ -94,7 +95,9 @@ const host = (href: string) => href.replace(/^https?:\/\/(www\.)?/, "").replace(
     {c.kind === "project" && (
       <div class="project">
         <div class="project-head">
-          {c.logo ? (
+          {c.logoAsset ? (
+            <Image class="logo" src={asset("logos", c.logoAsset)} alt={c.logoAlt ?? ""} height={44} densities={[1, 2, 3]} format="webp" />
+          ) : c.logo ? (
             <picture>
               {c.logoDark && <source srcset={c.logoDark} media="(prefers-color-scheme: dark)" />}
               <img class:list={["logo", { wide: c.logo.includes("devops") }]} src={c.logo} alt={c.logoAlt ?? ""} />
@@ -128,7 +131,10 @@ const host = (href: string) => href.replace(/^https?:\/\/(www\.)?/, "").replace(
           <ul class="links">
             {c.links.map((l) => (
               <li>
-                <a href={l.href}>{l.label}</a>
+                <a href={l.href}>
+                  <Forge href={l.href} />
+                  {l.label}
+                </a>
               </li>
             ))}
           </ul>
@@ -155,7 +161,10 @@ const host = (href: string) => href.replace(/^https?:\/\/(www\.)?/, "").replace(
           {c.links.map((l) => (
             <li>
               <a href={l.href}>
-                <span class="name">{l.label}</span>
+                <span class="name">
+                  <Forge href={l.href} />
+                  {l.label}
+                </span>
                 <span class="host">{host(l.href)}</span>
               </a>
             </li>
@@ -331,7 +340,8 @@ const host = (href: string) => href.replace(/^https?:\/\/(www\.)?/, "").replace(
   }
 
   picture {
-    display: contents;
+    display: flex;
+    flex: none;
   }
   .project-head {
     display: flex;
@@ -374,6 +384,7 @@ const host = (href: string) => href.replace(/^https?:\/\/(www\.)?/, "").replace(
   .links a {
     display: inline-flex;
     align-items: center;
+    gap: 8px;
     min-height: 44px;
     font-weight: 700;
   }
@@ -416,6 +427,9 @@ const host = (href: string) => href.replace(/^https?:\/\/(www\.)?/, "").replace(
     text-decoration: none;
   }
   .contact .name {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
     font-weight: 700;
     text-decoration: underline;
   }

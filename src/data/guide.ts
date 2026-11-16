@@ -58,7 +58,7 @@ export const guide = {
       types: ["TXT"],
       label: "TXT",
       means: "Free-form text attached to a name.",
-      here: "awards, hobbies, plans, and two projects",
+      here: "awards, hobbies, plans, and the NFC card",
     },
     {
       id: "mx",

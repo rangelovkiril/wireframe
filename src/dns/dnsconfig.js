@@ -72,8 +72,8 @@ D("rangelov.dev", REG_NONE,
 	CNAME("lms", "github.com."),
 	// tues-web.rangelov.dev. CNAME
 	CNAME("tues-web", "elsys.website."),
-	// miget.rangelov.dev. TXT
-	TXT("miget", "drone detection prototype, EDTH Sofia 2026"),
+	// miget.rangelov.dev. CNAME
+	CNAME("miget", "github.com."),
 	// _awards.rangelov.dev. TXT
 	TXT("_awards", "3rd place, TUES Fest", TTL(86400)),
 	// _hobbies.rangelov.dev. TXT

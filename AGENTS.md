@@ -104,7 +104,7 @@ clears the filter.
 | SRV | Says which server offers a service, with a priority and a weight. | what I work with; the weight is my confidence |
 | CAA | Lists who is allowed to issue certificates for the domain. | certificates I have earned |
 | CNAME | Makes one name an alias of another name. | my projects |
-| TXT | Free-form text attached to a name. | awards, hobbies, plans, and two projects |
+| TXT | Free-form text attached to a name. | awards, hobbies, plans, and the NFC card |
 | MX | Where email for the domain should be delivered. | how to reach me |
 
 ## Records (`src/data/zone.ts`)
@@ -127,7 +127,7 @@ no boxes. Owner names are lowercase (as in DNS); record types are uppercase.
 | lms.rangelov.dev. | 3600 | CNAME | `github.com.` |
 | _git-pages-repository.rangelov.dev. | 3600 | TXT | `"https://codeberg.org/rangelovkiril/contactless-vcard.git"` |
 | tues-web.rangelov.dev. | 3600 | CNAME | `elsys.website.` |
-| miget.rangelov.dev. | 3600 | TXT | `"drone detection prototype, EDTH Sofia 2026"` |
+| miget.rangelov.dev. | 3600 | CNAME | `github.com.` |
 | _awards.rangelov.dev. | 86400 | TXT | `"3rd place, TUES Fest"` |
 | _hobbies.rangelov.dev. | 3600 | TXT | `"trains" "coffee" "languages" "music"` |
 | _plans.rangelov.dev. | 900 | TXT | `"gap-year" "own-asn" "kcna" "fellowship"` |
@@ -176,12 +176,18 @@ Cisco entry is text only.
 - **RampMe** (icon: wheelchair user, ramp down from a bus seen from the front): Real-time accessibility for Sofia public transport, with wheelchair-ramp requests sent to the vehicle. Award: 3rd place at TUES Fest, showcased at Robotics Strategy Forum 2026. Link: Code on GitHub
 - **RIPE Atlas probe** (icon: probe with antenna): I host RIPE Atlas probe 1018643 on a Raspberry Pi 2 and use RIPE Atlas for my own measurements. Link: Probe 1018643 on RIPE Atlas
 - **RIPE Atlas ports** (icon: package): Unofficial armhf builds of the RIPE Atlas software probe, rebuilt automatically from upstream and published as a signed apt repository. Link: Source on Codeberg
-- **Light My Satellite (LMS)** (icon: satellite + laser): A distributed satellite laser ranging mini-station with a real-time 3D view. Award: TUES Fest, national IT olympiad. Link: Code on GitHub
+- **Light My Satellite (LMS)** (logo `assets/logos/lms.png`): A distributed satellite laser ranging mini-station with a real-time 3D view. Award: TUES Fest, national IT olympiad. Link: Code on GitHub
 - **NFC business card** (icon: card with NFC waves): A JavaCard running an NDEF applet. Tap it with a phone and you land on my contact card, served from Codeberg Pages at rangelov.dev. Link: rangelov.dev
 - **TUES website infrastructure** (icon: globe): A proposal, not an official school project: infrastructure for a new school website. It started as a k3s cluster and moved to Terraform on Azure Container Apps with OIDC deploys, plus a scraper that moved about 1,830 records from the old site into Directus. Paused while the school decides what it wants. Links: k3s setup on Codeberg, Azure setup on GitHub
-- **Project M.I.G.E.T.** (icon: drone): Drone detection prototype from EDTH Sofia 2026. My role was DevOps.
+- **Project M.I.G.E.T.** (icon: drone): Drone detection prototype from EDTH Sofia 2026. My role was DevOps. Links: Code on GitHub (rangelovkiril/EDTH), Infra on GitHub (rangelovkiril/EDTH-infra). The project is not listed publicly by EDTH.
 
 Icons: simple 24×24 inline stroke SVGs (currentColor, stroke 1.6).
+
+Every link to codeberg.org or github.com (projects and contact) has the forge's
+logo on its left (`components/Forge.astro`), in the official light/dark
+variants and otherwise unmodified: Codeberg's is CC0 (trademark of Codeberg
+e.V.), GitHub's is the MIT-licensed octicons mark, used as a link to a
+repository as github.com/logos allows. License notes are inside the SVGs.
 
 **TXT _awards, "Proud of":** 3rd place at TUES Fest with RampMe · Four RIPE NCC
 certifications in 2026 · Founded the TUES DevOps Club, about 40 members ·

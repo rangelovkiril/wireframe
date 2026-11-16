@@ -98,6 +98,7 @@ export type Content =
       title: string;
       logo?: string; // path under public/
       logoDark?: string; // variant for the dark theme
+      logoAsset?: string; // raster logo in assets/logos/, optimised at build time
       logoAlt?: string;
       icon?: IconName;
       text: string;
@@ -334,7 +335,8 @@ export const sections: Section[] = [
     content: {
       kind: "project",
       title: "Light My Satellite (LMS)",
-      icon: "satellite",
+      logoAsset: "lms.png",
+      logoAlt: "LMS logo",
       text: "A distributed satellite laser ranging mini-station with a real-time 3D view.",
       award: "TUES Fest, national IT olympiad",
       links: [{ label: "Code on GitHub", href: "https://github.com/rangelovkiril/lms-controller" }],
@@ -380,20 +382,16 @@ export const sections: Section[] = [
   {
     id: "miget",
     group: "projects",
-    records: [
-      {
-        owner: fqdn("miget"),
-        ttl: 3600,
-        rdata: { type: "TXT", strings: ["drone detection prototype, EDTH Sofia 2026"] },
-        managed: "portfolio",
-      },
-    ],
+    records: [cname("miget", "github.com.")],
     content: {
       kind: "project",
       title: "Project M.I.G.E.T.",
       icon: "drone",
       text: "Drone detection prototype from EDTH Sofia 2026. My role was DevOps.",
-      links: [],
+      links: [
+        { label: "Code on GitHub", href: "https://github.com/rangelovkiril/EDTH" },
+        { label: "Infra on GitHub", href: "https://github.com/rangelovkiril/EDTH-infra" },
+      ],
     },
   },
 

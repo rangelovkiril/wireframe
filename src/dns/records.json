@@ -92,10 +92,10 @@
   },
   {
     "subname": "miget",
-    "type": "TXT",
+    "type": "CNAME",
     "ttl": 3600,
     "records": [
-      "\"drone detection prototype, EDTH Sofia 2026\""
+      "github.com."
     ]
   },
   {
