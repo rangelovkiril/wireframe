@@ -1,16 +1,21 @@
 {
-  "name": "src",
-  "module": "index.ts",
+  "name": "rangelov-portfolio",
   "type": "module",
   "private": true,
   "scripts": {
     "typecheck": "bun check",
-    "export-dns": "bun scripts/export-dns.ts"
+    "export-dns": "bun scripts/export-dns.ts",
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview"
   },
   "devDependencies": {
     "@types/bun": "latest"
   },
   "peerDependencies": {
     "typescript": "^7"
+  },
+  "dependencies": {
+    "astro": "^7.4.12"
   }
 }
