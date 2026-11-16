@@ -6,6 +6,9 @@ export const quote = (s: string) => `"${s.replace(/[\\"]/g, (c) => `\\${c}`)}"`;
 /** Rdata exactly as it appears in a BIND zone file. */
 export function formatRdata(r: Rdata): string {
   switch (r.type) {
+    case "A":
+    case "AAAA":
+      return r.address;
     case "SOA":
       return `${r.mname} ${r.rname} ${r.serial} ${r.refresh} ${r.retry} ${r.expire} ${r.minimum}`;
     case "DNSKEY":

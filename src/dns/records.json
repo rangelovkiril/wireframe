@@ -31,10 +31,10 @@
   },
   {
     "subname": "protolith",
-    "type": "URI",
+    "type": "TXT",
     "ttl": 3600,
     "records": [
-      "10 1 \"https://codeberg.org/protolith\""
+      "\"https://codeberg.org/protolith\""
     ]
   },
   {
@@ -47,26 +47,26 @@
   },
   {
     "subname": "rampme",
-    "type": "URI",
+    "type": "TXT",
     "ttl": 3600,
     "records": [
-      "10 1 \"https://github.com/rangelovkiril/rampme-software\""
+      "\"https://github.com/rangelovkiril/rampme-software\""
     ]
   },
   {
     "subname": "atlas",
-    "type": "URI",
+    "type": "TXT",
     "ttl": 3600,
     "records": [
-      "10 1 \"https://codeberg.org/rangelovkiril/ripe-atlas-ports\""
+      "\"https://codeberg.org/rangelovkiril/ripe-atlas-ports\""
     ]
   },
   {
     "subname": "lms",
-    "type": "URI",
+    "type": "TXT",
     "ttl": 3600,
     "records": [
-      "10 1 \"https://github.com/rangelovkiril/lms-controller\""
+      "\"https://github.com/rangelovkiril/lms-controller\""
     ]
   },
   {
@@ -79,10 +79,10 @@
   },
   {
     "subname": "tues-web",
-    "type": "URI",
+    "type": "TXT",
     "ttl": 3600,
     "records": [
-      "10 1 \"https://codeberg.org/rangelovkiril/tues-website-infra\""
+      "\"https://codeberg.org/rangelovkiril/tues-website-infra\""
     ]
   },
   {
@@ -112,11 +112,19 @@
   {
     "subname": "_plans",
     "type": "TXT",
-    "ttl": 3600,
+    "ttl": 900,
     "records": [
       "\"gap-year\" \"own-asn\" \"kcna\" \"fellowship\""
-    ],
-    "page_ttl": 60
+    ]
+  },
+  {
+    "subname": "",
+    "type": "MX",
+    "ttl": 3600,
+    "records": [
+      "10 mail.protonmail.ch.",
+      "20 mailsec.protonmail.ch."
+    ]
   },
   {
     "subname": "portfolio",
@@ -124,6 +132,88 @@
     "ttl": 3600,
     "records": [
       "rangelovkiril.github.io."
+    ]
+  },
+  {
+    "subname": "",
+    "type": "TXT",
+    "ttl": 3600,
+    "records": [
+      "\"v=spf1 include:_spf.protonmail.ch ~all\"",
+      "\"protonmail-verification=1554c8c567c39ca28c9d28989d8469deaf895b01\""
+    ]
+  },
+  {
+    "subname": "protonmail._domainkey",
+    "type": "CNAME",
+    "ttl": 3600,
+    "records": [
+      "protonmail.domainkey.dkjpwfn5mnmkeczsyz2abjd4idelvbc7qaebbbszhc75nh54k4e5q.domains.proton.ch."
+    ]
+  },
+  {
+    "subname": "protonmail2._domainkey",
+    "type": "CNAME",
+    "ttl": 3600,
+    "records": [
+      "protonmail2.domainkey.dkjpwfn5mnmkeczsyz2abjd4idelvbc7qaebbbszhc75nh54k4e5q.domains.proton.ch."
+    ]
+  },
+  {
+    "subname": "protonmail3._domainkey",
+    "type": "CNAME",
+    "ttl": 3600,
+    "records": [
+      "protonmail3.domainkey.dkjpwfn5mnmkeczsyz2abjd4idelvbc7qaebbbszhc75nh54k4e5q.domains.proton.ch."
+    ]
+  },
+  {
+    "subname": "_dmarc",
+    "type": "TXT",
+    "ttl": 3600,
+    "records": [
+      "\"v=DMARC1; p=quarantine\""
+    ]
+  },
+  {
+    "subname": "_git-pages-repository",
+    "type": "TXT",
+    "ttl": 3600,
+    "records": [
+      "\"https://codeberg.org/rangelovkiril/contactless-vcard.git\""
+    ]
+  },
+  {
+    "subname": "_git-pages-repository.card",
+    "type": "TXT",
+    "ttl": 3600,
+    "records": [
+      "\"https://codeberg.org/rangelovkiril/contactless-vcard.git\""
+    ]
+  },
+  {
+    "subname": "hedgedoc",
+    "type": "A",
+    "ttl": 3600,
+    "records": [
+      "57.131.192.218"
+    ]
+  },
+  {
+    "subname": "hedgedoc",
+    "type": "AAAA",
+    "ttl": 3600,
+    "records": [
+      "2001:41d0:601:1100::a392"
+    ]
+  },
+  {
+    "subname": "hedgedoc",
+    "type": "CAA",
+    "ttl": 3600,
+    "records": [
+      "0 issue \"letsencrypt.org; validationmethods=tls-alpn-01\"",
+      "0 issuewild \";\""
     ]
   }
 ]

@@ -57,14 +57,16 @@ public/
 The records on the page are published for real in the `rangelov.dev` zone
 (DNS at deSEC, managed by Kiril with dnscontrol in a separate repo).
 
-- `src/scripts/export-dns.ts` reads `zone.ts` and writes `dns/records.json`
-  plus a ready-to-paste dnscontrol snippet (`dns/records.js`) with every
-  record that should exist: SRV x11, CAA at `_certs` x5, URI/CNAME projects,
-  TXT records, and `portfolio CNAME rangelovkiril.github.io.`
+- `zone.ts` holds the whole zone: the portfolio records plus the rest
+  (Proton Mail, Codeberg Pages, hedgedoc). Each record is `managed:`
+  `"desec"` (display only), `"infra"` (stays after archiving) or `"portfolio"`.
+- `src/scripts/export-dns.ts` (`bun run export-dns`) writes the complete
+  dnscontrol config `dns/dnsconfig.js` (one file; portfolio records in one
+  block at the end, deleted when the site is archived) and `dns/records.json`.
 - SOA and DNSKEY are managed by deSEC; they are only displayed, never exported.
-- TXT strings must stay under 255 bytes each.
-- Check whether dnscontrol and deSEC support the URI type. If either does not,
-  say so and propose the closest valid fallback instead of inventing syntax.
+- TXT strings must stay under 255 bytes each. Minimum TTL is 900 (deSEC).
+- dnscontrol has no URI type, so URI records are published as TXT holding the
+  same URL. The page and the zone file still show them as URI.
 - Never run `dnscontrol push` or call the deSEC API. Kiril reviews
   `dnscontrol preview` and pushes himself.
 
@@ -112,10 +114,10 @@ no boxes. Owner names are lowercase (as in DNS); record types are uppercase.
 
 | owner | ttl | type | rdata on the page |
 |---|---|---|---|
-| rangelov.dev. | 3600 | SOA | `ns1.desec.io. contact.rangelov.dev. 2026111601` |
+| rangelov.dev. | 300 | SOA | `get.desec.io. get.desec.io. 2026113469` (as published; timers only in the zone file) |
 | rangelov.dev. | 3600 | DNSKEY | `257 3 13 ( … )` |
 | _skills._tcp.rangelov.dev. | 3600 | SRV | `10 80 443 linux.rangelov.dev.` (first of 11) |
-| _certs.rangelov.dev. | 86400 | CAA | `0 issue "ripe.net"` |
+| _certs.rangelov.dev. | 86400 | CAA | `0 issue "ripe.net; course=lir-fundamentals"` (each of the 5 has its own `course=` so the RRset has no duplicates) |
 | protolith.rangelov.dev. | 3600 | URI | `10 1 "https://codeberg.org/protolith"` |
 | devops.rangelov.dev. | 3600 | CNAME | `devops.elsys.club.` |
 | rampme.rangelov.dev. | 3600 | URI | `10 1 "https://github.com/rangelovkiril/rampme-software"` |
@@ -126,8 +128,8 @@ no boxes. Owner names are lowercase (as in DNS); record types are uppercase.
 | miget.rangelov.dev. | 3600 | TXT | `"drone detection prototype, EDTH Sofia 2026"` |
 | _awards.rangelov.dev. | 86400 | TXT | `"3rd place, TUES Fest"` |
 | _hobbies.rangelov.dev. | 3600 | TXT | `"trains" "coffee" "languages" "music"` |
-| _plans.rangelov.dev. | 60 | TXT | `"gap-year" "own-asn" "kcna" "fellowship"` |
-| rangelov.dev. | 3600 | MX | `10 contact.rangelov.dev.` (replace with the real MX host) |
+| _plans.rangelov.dev. | 900 | TXT | `"gap-year" "own-asn" "kcna" "fellowship"` |
+| rangelov.dev. | 3600 | MX | `10 mail.protonmail.ch.` (and `20 mailsec.protonmail.ch.`) |
 
 The certificate records live at `_certs`, never at the apex: CAA is checked by
 every CA, and `issue "ripe.net"` at `rangelov.dev.` would stop Let's Encrypt

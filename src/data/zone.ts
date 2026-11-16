@@ -5,6 +5,8 @@ export const ORIGIN = "rangelov.dev.";
 export const DEFAULT_TTL = 3600;
 
 export type RRType =
+  | "A"
+  | "AAAA"
   | "SOA"
   | "DNSKEY"
   | "SRV"
@@ -15,6 +17,8 @@ export type RRType =
   | "MX";
 
 export type Rdata =
+  | { type: "A"; address: string }
+  | { type: "AAAA"; address: string }
   | {
       type: "SOA";
       mname: string;
@@ -35,11 +39,11 @@ export type Rdata =
 
 /**
  * Who manages the record in the real zone:
- * - "desec":      created by deSEC itself (SOA, DNSKEY); display only
- * - "existing":   already in Kiril's dnscontrol config (mail); display only
- * - "dnscontrol": exported by scripts/export-dns.ts
+ * - "desec":     created by deSEC itself (SOA, DNSKEY); display only, never exported
+ * - "infra":     the rest of the zone (mail, Pages, hedgedoc); exported, stays when the portfolio is archived
+ * - "portfolio": exists only for this site; exported as one block that can be deleted on archive
  */
-export type Managed = "desec" | "existing" | "dnscontrol";
+export type Managed = "desec" | "infra" | "portfolio";
 
 export interface RR {
   owner: string; // absolute, lowercase, trailing dot
@@ -125,7 +129,7 @@ const uri = (label: string, target: string): RR => ({
   owner: fqdn(label),
   ttl: 3600,
   rdata: { type: "URI", priority: 10, weight: 1, target },
-  managed: "dnscontrol",
+  managed: "portfolio",
 });
 
 export const sections: Section[] = [
@@ -135,13 +139,14 @@ export const sections: Section[] = [
     records: [
       {
         owner: ORIGIN,
-        ttl: 3600,
+        ttl: 300,
+        // As deSEC publishes it. The page shows mname, rname and serial; the
+        // zone file needs the timers too.
         rdata: {
           type: "SOA",
-          mname: "ns1.desec.io.",
-          rname: "contact.rangelov.dev.",
-          serial: 2026111601,
-          // timers as deSEC publishes them
+          mname: "get.desec.io.",
+          rname: "get.desec.io.",
+          serial: 2026113469,
           refresh: 86400,
           retry: 3600,
           expire: 2419200,
@@ -188,7 +193,7 @@ export const sections: Section[] = [
       owner: fqdn("_skills._tcp"),
       ttl: 3600,
       rdata: { type: "SRV", priority: 10, weight: s.weight, port: 443, target: fqdn(s.host) },
-      managed: "dnscontrol",
+      managed: "portfolio",
     })),
     content: {
       kind: "skills",
@@ -204,7 +209,7 @@ export const sections: Section[] = [
       owner: fqdn("_certs"),
       ttl: 86400,
       rdata: { type: "CAA", flags: 0, tag: "issue", value: `${c.domain}; course=${c.param}` },
-      managed: "dnscontrol",
+      managed: "portfolio",
     })),
     content: {
       kind: "certs",
@@ -236,7 +241,7 @@ export const sections: Section[] = [
         owner: fqdn("devops"),
         ttl: 3600,
         rdata: { type: "CNAME", target: "devops.elsys.club." },
-        managed: "dnscontrol",
+        managed: "portfolio",
       },
     ],
     content: {
@@ -299,7 +304,7 @@ export const sections: Section[] = [
         owner: fqdn("card"),
         ttl: 3600,
         rdata: { type: "CNAME", target: "codeberg.page." },
-        managed: "dnscontrol",
+        managed: "infra", // the card itself, not just this site
       },
     ],
     content: {
@@ -334,7 +339,7 @@ export const sections: Section[] = [
         owner: fqdn("miget"),
         ttl: 3600,
         rdata: { type: "TXT", strings: ["drone detection prototype, EDTH Sofia 2026"] },
-        managed: "dnscontrol",
+        managed: "portfolio",
       },
     ],
     content: {
@@ -355,7 +360,7 @@ export const sections: Section[] = [
         owner: fqdn("_awards"),
         ttl: 86400,
         rdata: { type: "TXT", strings: ["3rd place, TUES Fest"] },
-        managed: "dnscontrol",
+        managed: "portfolio",
       },
     ],
     content: {
@@ -378,7 +383,7 @@ export const sections: Section[] = [
         owner: fqdn("_hobbies"),
         ttl: 3600,
         rdata: { type: "TXT", strings: ["trains", "coffee", "languages", "music"] },
-        managed: "dnscontrol",
+        managed: "portfolio",
       },
     ],
     content: {
@@ -399,9 +404,9 @@ export const sections: Section[] = [
     records: [
       {
         owner: fqdn("_plans"),
-        ttl: 60,
+        ttl: 900,
         rdata: { type: "TXT", strings: ["gap-year", "own-asn", "kcna", "fellowship"] },
-        managed: "dnscontrol",
+        managed: "portfolio",
       },
     ],
     content: {
@@ -421,10 +426,10 @@ export const sections: Section[] = [
   {
     id: "mx",
     group: "mx",
-    // The real, already-published Proton Mail exchangers.
+    // Proton Mail, the reason contact@rangelov.dev works.
     records: [
-      { owner: ORIGIN, ttl: 3600, rdata: { type: "MX", preference: 10, exchange: "mail.protonmail.ch." }, managed: "existing" },
-      { owner: ORIGIN, ttl: 3600, rdata: { type: "MX", preference: 20, exchange: "mailsec.protonmail.ch." }, managed: "existing" },
+      { owner: ORIGIN, ttl: 3600, rdata: { type: "MX", preference: 10, exchange: "mail.protonmail.ch." }, managed: "infra" },
+      { owner: ORIGIN, ttl: 3600, rdata: { type: "MX", preference: 20, exchange: "mailsec.protonmail.ch." }, managed: "infra" },
     ],
     content: {
       kind: "contact",
@@ -439,14 +444,40 @@ export const sections: Section[] = [
   },
 ];
 
-/** Records that belong to the zone but have no section on the page. */
+// ---------------------------------------------------------------------------
+// Records that belong to the zone but have no section on the page.
+
+const infra = (label: string, rdata: Rdata, ttl = DEFAULT_TTL): RR => ({ owner: fqdn(label), ttl, rdata, managed: "infra" });
+const PROTON_DKIM = "domainkey.dkjpwfn5mnmkeczsyz2abjd4idelvbc7qaebbbszhc75nh54k4e5q.domains.proton.ch.";
+const VCARD_REPO = "https://codeberg.org/rangelovkiril/contactless-vcard.git";
+
 export const extraRecords: RR[] = [
+  // GitHub Pages: this site
   {
     owner: fqdn("portfolio"),
     ttl: 3600,
     rdata: { type: "CNAME", target: "rangelovkiril.github.io." },
-    managed: "dnscontrol",
+    managed: "portfolio",
   },
+
+  // Proton Mail (the MX records are the MX section above)
+  infra("@", { type: "TXT", strings: ["v=spf1 include:_spf.protonmail.ch ~all"] }),
+  infra("@", { type: "TXT", strings: ["protonmail-verification=1554c8c567c39ca28c9d28989d8469deaf895b01"] }),
+  infra("protonmail._domainkey", { type: "CNAME", target: `protonmail.${PROTON_DKIM}` }),
+  infra("protonmail2._domainkey", { type: "CNAME", target: `protonmail2.${PROTON_DKIM}` }),
+  infra("protonmail3._domainkey", { type: "CNAME", target: `protonmail3.${PROTON_DKIM}` }),
+  infra("_dmarc", { type: "TXT", strings: ["v=DMARC1; p=quarantine"] }),
+
+  // Codeberg Pages: the NFC card (card CNAME is in the projects above).
+  // The apex has no A/AAAA yet: deSEC has no ALIAS/CNAME flattening.
+  infra("_git-pages-repository", { type: "TXT", strings: [VCARD_REPO] }),
+  infra("_git-pages-repository.card", { type: "TXT", strings: [VCARD_REPO] }),
+
+  // HedgeDoc
+  infra("hedgedoc", { type: "A", address: "57.131.192.218" }),
+  infra("hedgedoc", { type: "AAAA", address: "2001:41d0:601:1100::a392" }),
+  infra("hedgedoc", { type: "CAA", flags: 0, tag: "issue", value: "letsencrypt.org; validationmethods=tls-alpn-01" }),
+  infra("hedgedoc", { type: "CAA", flags: 0, tag: "issuewild", value: ";" }),
 ];
 
 /** Every record, in page order, followed by the extras. */

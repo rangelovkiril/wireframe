@@ -1,54 +1,67 @@
-// Reads data/zone.ts and writes:
-//   dns/records.json  the records as deSEC-style RRsets, with their real types (URI included)
-//   dns/records.js    a dnscontrol snippet to require() from dnsconfig.js
+// Reads data/zone.ts and writes the whole rangelov.dev zone as:
+//   dns/dnsconfig.js  complete dnscontrol config, one file
+//   dns/records.json  the same records as deSEC-style RRsets
 //
-// Only records with managed: "dnscontrol" are exported. SOA and DNSKEY belong
-// to deSEC, and the MX/SPF records already live in the main dnsconfig.js.
+// SOA and DNSKEY belong to deSEC and are never exported. Portfolio-only
+// records are written as one block, so archiving the site means deleting it.
 // This script never talks to deSEC or runs dnscontrol.
 
-import { allRecords, ORIGIN, type RR } from "../data/zone.ts";
+import { allRecords, DEFAULT_TTL, ORIGIN, type Managed, type Rdata, type RR } from "../data/zone.ts";
 import { formatRdata } from "../lib/zonefile.ts";
 
-// deSEC rejects TTLs below the domain's minimum_ttl (3600 unless deSEC has
-// lowered it for the account). Records with a smaller TTL on the page are
-// published with this one instead.
-const MIN_TTL = 3600;
+const MIN_TTL = 900; // deSEC minimum_ttl for rangelov.dev
 
-const outDir = new URL("../dns/", import.meta.url);
-const records = allRecords.filter((r) => r.managed === "dnscontrol");
+type Published = Rdata & { type: Exclude<Rdata["type"], "URI" | "SOA" | "DNSKEY"> };
+interface Out {
+  owner: string;
+  ttl: number;
+  managed: Managed;
+  rdata: Published;
+  uri?: string; // original URI rdata, when published as TXT
+}
+
+// dnscontrol has no URI record type, so a URI is published as a TXT record
+// holding the same URL.
+const out: Out[] = allRecords
+  .filter((r) => r.managed !== "desec")
+  .map((r: RR) => {
+    const d = r.rdata;
+    if (d.type === "SOA" || d.type === "DNSKEY") throw new Error(`${r.owner} ${d.type} is deSEC's, mark it managed: "desec"`);
+    if (d.type === "URI") return { ...r, rdata: { type: "TXT", strings: [d.target] }, uri: formatRdata(d) };
+    return { ...r, rdata: d };
+  });
 
 // --- validation --------------------------------------------------------------
 
 const bytes = (s: string) => new TextEncoder().encode(s).length;
+const rrset = (r: Out) => `${r.owner} ${r.rdata.type}`;
 const errors: string[] = [];
+const seen = new Set<string>();
+const ttls = new Map<string, number>();
 
-for (const r of records) {
-  const where = `${r.owner} ${r.rdata.type}`;
+for (const r of out) {
+  const d = r.rdata;
+  const where = rrset(r);
   if (r.owner !== r.owner.toLowerCase()) errors.push(`${where}: owner must be lowercase`);
   if (!r.owner.endsWith(ORIGIN)) errors.push(`${where}: owner outside ${ORIGIN}`);
-  const d = r.rdata;
-  if (d.type === "TXT") {
-    for (const s of d.strings) if (bytes(s) > 255) errors.push(`${where}: TXT string over 255 bytes: ${s}`);
-  }
-  if (d.type === "URI" && bytes(d.target) > 255) errors.push(`${where}: URI fallback TXT would exceed 255 bytes`);
+  if (r.ttl < MIN_TTL) errors.push(`${where}: TTL ${r.ttl} is below deSEC's minimum of ${MIN_TTL}`);
+  if (d.type === "TXT") for (const s of d.strings) if (bytes(s) > 255) errors.push(`${where}: TXT string over 255 bytes`);
   if ((d.type === "CNAME" || d.type === "SRV") && !d.target.endsWith(".")) errors.push(`${where}: target must be absolute`);
-}
+  if (d.type === "MX" && !d.exchange.endsWith(".")) errors.push(`${where}: exchange must be absolute`);
 
-// An RRset with two identical records is published as one (RFC 2181 §5).
-const seen = new Set<string>();
-for (const r of records) {
-  const key = `${r.owner} ${r.rdata.type} ${formatRdata(r.rdata)}`;
+  // Identical records in an RRset collapse into one (RFC 2181 §5).
+  const key = `${where} ${formatRdata(d)}`;
   if (seen.has(key)) errors.push(`duplicate record: ${key}`);
   seen.add(key);
+
+  const ttl = ttls.get(where);
+  if (ttl !== undefined && ttl !== r.ttl) errors.push(`${where}: mixed TTLs in one RRset`);
+  ttls.set(where, r.ttl);
 }
 
-// One owner name, one TTL per RRset.
-const ttlByRRset = new Map<string, number>();
-for (const r of records) {
-  const key = `${r.owner} ${r.rdata.type}`;
-  const prev = ttlByRRset.get(key);
-  if (prev !== undefined && prev !== r.ttl) errors.push(`${key}: mixed TTLs in one RRset`);
-  ttlByRRset.set(key, r.ttl);
+// A CNAME owner can have no other data (RFC 1034 §3.6.2).
+for (const c of out.filter((r) => r.rdata.type === "CNAME")) {
+  if (out.some((r) => r !== c && r.owner === c.owner)) errors.push(`${c.owner}: CNAME next to other records`);
 }
 
 if (errors.length) {
@@ -59,87 +72,79 @@ if (errors.length) {
 // --- helpers -----------------------------------------------------------------
 
 const subname = (owner: string) => (owner === ORIGIN ? "" : owner.slice(0, -(ORIGIN.length + 1)));
-const label = (owner: string) => subname(owner) || "@";
-const ttlOf = (r: RR) => Math.max(r.ttl, MIN_TTL);
 const js = (v: unknown) => JSON.stringify(v);
 
-// --- records.json (deSEC RRset shape: subname, type, ttl, records[]) ---------
-
-interface RRset {
-  subname: string;
-  type: string;
-  ttl: number;
-  records: string[];
-  page_ttl?: number;
-}
-
-const rrsets = new Map<string, RRset>();
-for (const r of records) {
-  const key = `${r.owner} ${r.rdata.type}`;
-  let set = rrsets.get(key);
-  if (!set) {
-    set = { subname: subname(r.owner), type: r.rdata.type, ttl: ttlOf(r), records: [] };
-    if (r.ttl !== set.ttl) set.page_ttl = r.ttl;
-    rrsets.set(key, set);
-  }
-  set.records.push(formatRdata(r.rdata));
-}
-
-await Bun.write(new URL("records.json", outDir), JSON.stringify([...rrsets.values()], null, 2) + "\n");
-
-// --- records.js (dnscontrol) -------------------------------------------------
-
-function dnscontrol(r: RR): string {
-  const name = js(label(r.owner));
-  const ttl = `TTL(${ttlOf(r)})`;
+function dnscontrol(r: Out): string {
+  const name = js(subname(r.owner) || "@");
+  const ttl = r.ttl === DEFAULT_TTL ? "" : `, TTL(${r.ttl})`;
   const d = r.rdata;
   switch (d.type) {
+    case "A":
+    case "AAAA":
+      return `${d.type}(${name}, ${js(d.address)}${ttl})`;
     case "SRV":
-      return `SRV(${name}, ${d.priority}, ${d.weight}, ${d.port}, ${js(d.target)}, ${ttl})`;
+      return `SRV(${name}, ${d.priority}, ${d.weight}, ${d.port}, ${js(d.target)}${ttl})`;
     case "CAA":
-      return `CAA(${name}, ${js(d.tag)}, ${js(d.value)}, ${ttl})`;
+      return `CAA(${name}, ${js(d.tag)}, ${js(d.value)}${ttl})`;
     case "CNAME":
-      return `CNAME(${name}, ${js(d.target)}, ${ttl})`;
+      return `CNAME(${name}, ${js(d.target)}${ttl})`;
     case "TXT":
-      return `TXT(${name}, ${js(d.strings.length === 1 ? d.strings[0] : d.strings)}, ${ttl})`;
+      return `TXT(${name}, ${js(d.strings.length === 1 ? d.strings[0] : d.strings)}${ttl})`;
     case "MX":
-      return `MX(${name}, ${d.preference}, ${js(d.exchange)}, ${ttl})`;
-    case "URI":
-      // dnscontrol has no URI() builder; publish the target as TXT.
-      return `TXT(${name}, ${js(d.target)}, ${ttl}), // fallback for URI ${formatRdata(d)}`;
-    case "SOA":
-    case "DNSKEY":
-      throw new Error(`${d.type} is managed by deSEC and must not be exported`);
+      return `MX(${name}, ${d.preference}, ${js(d.exchange)}${ttl})`;
   }
 }
 
-const lines: string[] = [
+function block(records: Out[]): string[] {
+  const lines: string[] = [];
+  let last = "";
+  for (const r of records) {
+    const key = rrset(r);
+    if (key !== last) lines.push(`\t// ${r.owner} ${r.uri ? `URI ${r.uri}` : r.rdata.type}`);
+    last = key;
+    lines.push(`\t${dnscontrol(r)},`);
+  }
+  return lines;
+}
+
+// --- dns/dnsconfig.js --------------------------------------------------------
+
+const config = [
   "// Generated by scripts/export-dns.ts from data/zone.ts. Do not edit by hand.",
+  "// The whole rangelov.dev zone except SOA and DNSKEY, which deSEC manages.",
   "//",
-  "// In dnsconfig.js:",
-  '//   require("./records.js");',
-  '//   D("rangelov.dev", REG_INWX, DnsProvider(DSP_DESEC), /* existing records */, PORTFOLIO_RECORDS);',
+  "//   dnscontrol preview --config dns/dnsconfig.js --creds ~/creds.json",
   "//",
-  "// dnscontrol has no URI record type, so the URI records are published as",
-  "// TXT records holding the same URL (deSEC itself supports URI; see",
-  "// records.json for the records with their real types).",
+  "// dnscontrol has no URI record type: URI records are published as TXT",
+  "// records holding the same URL.",
   "",
-  "var PORTFOLIO_RECORDS = [",
+  'var REG_NONE = NewRegistrar("none");',
+  'var DSP_DESEC = NewDnsProvider("desec");',
+  "",
+  `D("${ORIGIN.slice(0, -1)}", REG_NONE,`,
+  "\tDnsProvider(DSP_DESEC),",
+  `\tDefaultTTL(${DEFAULT_TTL}),`,
+  "",
+  ...block(out.filter((r) => r.managed === "infra")),
+  "",
+  "\t// === portfolio.rangelov.dev: delete from here to END when the site is archived ===",
+  ...block(out.filter((r) => r.managed === "portfolio")),
+  "END);",
+  "",
 ];
 
-let lastKey = "";
-for (const r of records) {
-  const key = `${r.owner} ${r.rdata.type}`;
-  if (key !== lastKey) {
-    const note = r.ttl < MIN_TTL ? ` (page TTL ${r.ttl}, raised to deSEC minimum ${MIN_TTL})` : "";
-    lines.push(`  // ${key}${note}`);
-    lastKey = key;
-  }
-  const line = dnscontrol(r);
-  lines.push(`  ${line.includes("//") ? line : `${line},`}`);
+const dir = new URL("../dns/", import.meta.url);
+await Bun.write(new URL("dnsconfig.js", dir), config.join("\n"));
+
+// --- dns/records.json --------------------------------------------------------
+
+const sets = new Map<string, { subname: string; type: string; ttl: number; records: string[] }>();
+for (const r of out) {
+  const key = rrset(r);
+  const set = sets.get(key) ?? { subname: subname(r.owner), type: r.rdata.type, ttl: r.ttl, records: [] };
+  set.records.push(formatRdata(r.rdata));
+  sets.set(key, set);
 }
-lines.push("];", "");
+await Bun.write(new URL("records.json", dir), JSON.stringify([...sets.values()], null, 2) + "\n");
 
-await Bun.write(new URL("records.js", outDir), lines.join("\n"));
-
-console.log(`exported ${records.length} records in ${rrsets.size} RRsets to dns/records.{json,js}`);
+console.log(`exported ${out.length} records in ${sets.size} RRsets to dns/dnsconfig.js and dns/records.json`);
