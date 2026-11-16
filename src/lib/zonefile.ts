@@ -51,11 +51,13 @@ export function renderZone(records: RR[]): string {
   const yw = width((r) => r.rdata.type);
   return [
     `; ${ORIGIN.slice(0, -1)}, generated from the portfolio's data when the site was built.`,
-    "; Not a live transfer: deSEC does not allow AXFR. URI records are published as TXT.",
+    "; Not a live transfer: deSEC does not allow AXFR.",
     `$ORIGIN ${ORIGIN}`,
     `$TTL ${DEFAULT_TTL}`,
     ...ordered.map(
-      (r) => `${r.owner.padEnd(ow)} ${String(r.ttl).padStart(tw)} IN ${r.rdata.type.padEnd(yw)} ${formatRdata(r.rdata)}`,
+      (r) =>
+        `${r.owner.padEnd(ow)} ${String(r.ttl).padStart(tw)} IN ${r.rdata.type.padEnd(yw)} ${formatRdata(r.rdata)}` +
+        (r.comment ? ` ; ${r.comment}` : ""),
     ),
     "",
   ].join("\n");

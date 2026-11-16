@@ -66,8 +66,8 @@ The records on the page are published for real in the `rangelov.dev` zone
   block at the end, deleted when the site is archived) and `dns/records.json`.
 - SOA and DNSKEY are managed by deSEC; they are only displayed, never exported.
 - TXT strings must stay under 255 bytes each. Minimum TTL is 900 (deSEC).
-- dnscontrol has no URI type, so URI records are published as TXT holding the
-  same URL. The page and the zone file still show them as URI.
+- No URI records (dnscontrol has no URI type, and they add little): projects
+  are CNAMEs to the host their source or site lives on.
 - Never run `dnscontrol push` or call the deSEC API. Kiril reviews
   `dnscontrol preview` and pushes himself.
 
@@ -75,7 +75,7 @@ The records on the page are published for real in the `rangelov.dev` zone
 
 1. Hero
 2. "What the records mean" guide (also the filter)
-3. Records: `SOA` → `DNSKEY` → `SRV` → `CAA` → projects (`URI`/`CNAME`/`TXT`) → `TXT` awards → `TXT` hobbies → `TXT` plans → `MX`
+3. Records: `SOA` → `DNSKEY` → `SRV` → `CAA` → projects (`CNAME`/`TXT`) → `TXT` awards → `TXT` hobbies → `TXT` plans → `MX`
 4. Zone transfer panel (download the zone file)
 5. Footer
 
@@ -103,7 +103,7 @@ clears the filter.
 | DNSKEY | The zone's public key. Resolvers use it to check that answers were not tampered with (DNSSEC). | my picture, drawn from the key |
 | SRV | Says which server offers a service, with a priority and a weight. | what I work with; the weight is my confidence |
 | CAA | Lists who is allowed to issue certificates for the domain. | certificates I have earned |
-| URI, CNAME | URI points a name at a web address. CNAME makes one name an alias of another. | my projects |
+| CNAME | Makes one name an alias of another name. | my projects |
 | TXT | Free-form text attached to a name. | awards, hobbies, plans, and two projects |
 | MX | Where email for the domain should be delivered. | how to reach me |
 
@@ -117,15 +117,16 @@ no boxes. Owner names are lowercase (as in DNS); record types are uppercase.
 |---|---|---|---|
 | rangelov.dev. | 300 | SOA | `get.desec.io. get.desec.io. 2026113469` (as published; timers only in the zone file) |
 | rangelov.dev. | 3600 | DNSKEY | `257 3 13 ( … )` |
-| _skills._tcp.rangelov.dev. | 3600 | SRV | `10 80 443 linux.rangelov.dev.` (first of 11) |
-| _certs.rangelov.dev. | 86400 | CAA | `0 issue "ripe.net; course=lir-fundamentals"` (each of the 5 has its own `course=` so the RRset has no duplicates) |
-| protolith.rangelov.dev. | 3600 | URI | `10 1 "https://codeberg.org/protolith"` |
+| _skills._tcp.rangelov.dev. | 3600 | SRV | `1 80 443 rangelov.dev.` (first of 11: priority = place in the list, weight = confidence, target = me; skill name as a zone-file comment) |
+| _certs.rangelov.dev. | 86400 | CAA | `0 issue "ripe.net"` (and `0 issue "netacad.com"`: one record per issuer) |
+| protolith.rangelov.dev. | 3600 | CNAME | `codeberg.org.` (protolith.dev exists but is empty for now) |
 | devops.rangelov.dev. | 3600 | CNAME | `devops.elsys.club.` |
-| rampme.rangelov.dev. | 3600 | URI | `10 1 "https://github.com/rangelovkiril/rampme-software"` |
-| atlas.rangelov.dev. | 3600 | URI | `10 1 "https://codeberg.org/rangelovkiril/ripe-atlas-ports"` |
-| lms.rangelov.dev. | 3600 | URI | `10 1 "https://github.com/rangelovkiril/lms-controller"` |
+| rampme.rangelov.dev. | 3600 | CNAME | `github.com.` |
+| atlas.rangelov.dev. | 3600 | CNAME | `atlas.ripe.net.` |
+| atlas-ports.rangelov.dev. | 3600 | CNAME | `codeberg.org.` |
+| lms.rangelov.dev. | 3600 | CNAME | `github.com.` |
 | _git-pages-repository.rangelov.dev. | 3600 | TXT | `"https://codeberg.org/rangelovkiril/contactless-vcard.git"` |
-| tues-web.rangelov.dev. | 3600 | URI | `10 1 "https://codeberg.org/rangelovkiril/tues-website-infra"` |
+| tues-web.rangelov.dev. | 3600 | CNAME | `elsys.website.` |
 | miget.rangelov.dev. | 3600 | TXT | `"drone detection prototype, EDTH Sofia 2026"` |
 | _awards.rangelov.dev. | 86400 | TXT | `"3rd place, TUES Fest"` |
 | _hobbies.rangelov.dev. | 3600 | TXT | `"trains" "coffee" "languages" "music"` |
@@ -137,8 +138,9 @@ every CA, and `issue "ripe.net"` at `rangelov.dev.` would stop Let's Encrypt
 from issuing certificates for the apex and every subdomain, including this
 site on GitHub Pages.
 
-CNAME is used only where the target is a hostname. Links to repositories are
-`URI` records (RFC 7553), because a CNAME cannot point at a URL.
+A CNAME can only name a host, never a URL with a path, so each project's
+CNAME points at the host (forge or site) and the full address is the link on
+the page.
 
 ### Content under each record
 
@@ -170,12 +172,13 @@ Cisco entry is text only.
 
 **Projects** (logo or icon, title, text, award, links; links always visible):
 - **Protolith** (logo `protolith.svg`): A sovereign DevOps platform built from free software (Forgejo, Harbor, OpenBao), with SLSA Build L3 compatible builds, running on European cloud. My diploma thesis.
-- **TUES DevOps Club** (logo `devops-club.svg`, the full wordmark, never just the wheel): The club I founded and run, plus the elsys.club domain that gives school clubs their own subdomains. Link: devops.elsys.club
-- **RampMe** (icon: bus with ramp): Real-time accessibility for Sofia public transport, with wheelchair-ramp requests sent to the vehicle. Award: 3rd place at TUES Fest, showcased at Robotics Strategy Forum 2026. Link: Code on GitHub
-- **RIPE Atlas probe** (icon: probe with antenna): Probe 1018643 on a Raspberry Pi 2, and unofficial signed armhf builds of the software probe. Link: ripe-atlas-ports on Codeberg
-- **LMS** (icon: satellite + laser): A distributed satellite laser ranging mini-station with a real-time 3D view. Award: TUES Fest, national IT olympiad. Link: Code on GitHub
+- **TUES DevOps Club** (logo `devops-club.svg` / `devops-club-dark.svg`, the transparent full wordmark for each theme, never just the wheel): The club I founded and run, plus the elsys.club domain that gives school clubs their own subdomains. Link: devops.elsys.club
+- **RampMe** (icon: wheelchair user, ramp down from a bus seen from the front): Real-time accessibility for Sofia public transport, with wheelchair-ramp requests sent to the vehicle. Award: 3rd place at TUES Fest, showcased at Robotics Strategy Forum 2026. Link: Code on GitHub
+- **RIPE Atlas probe** (icon: probe with antenna): I host RIPE Atlas probe 1018643 on a Raspberry Pi 2 and use RIPE Atlas for my own measurements. Link: Probe 1018643 on RIPE Atlas
+- **RIPE Atlas ports** (icon: package): Unofficial armhf builds of the RIPE Atlas software probe, rebuilt automatically from upstream and published as a signed apt repository. Link: Source on Codeberg
+- **Light My Satellite (LMS)** (icon: satellite + laser): A distributed satellite laser ranging mini-station with a real-time 3D view. Award: TUES Fest, national IT olympiad. Link: Code on GitHub
 - **NFC business card** (icon: card with NFC waves): A JavaCard running an NDEF applet. Tap it with a phone and you land on my contact card, served from Codeberg Pages at rangelov.dev. Link: rangelov.dev
-- **TUES website infrastructure** (icon: globe): Infrastructure for a new school website: Terraform on Azure Container Apps with OIDC deploys, plus a scraper that moved about 1,830 records from the old site into Directus. Paused while the school decides what it wants. Link: Infra on Codeberg
+- **TUES website infrastructure** (icon: globe): A proposal, not an official school project: infrastructure for a new school website. It started as a k3s cluster and moved to Terraform on Azure Container Apps with OIDC deploys, plus a scraper that moved about 1,830 records from the old site into Directus. Paused while the school decides what it wants. Links: k3s setup on Codeberg, Azure setup on GitHub
 - **Project M.I.G.E.T.** (icon: drone): Drone detection prototype from EDTH Sofia 2026. My role was DevOps.
 
 Icons: simple 24×24 inline stroke SVGs (currentColor, stroke 1.6).
@@ -256,8 +259,7 @@ everything is still visible and readable.
    The `verify` button stays outside the `<summary>` (no nested buttons).
 1. **Guide as filter.** The guide rows are radio-style toggles. Filtering
    works with CSS `:has()` and no JS. The active row gets `--panel`
-   background and a 4px inset bar in its type colour. "URI, CNAME" filters
-   both types.
+   background and a 4px inset bar in its type colour.
 2. **Zone transfer (bottom).** Panel titled `Take the whole zone with you`
    with a one-line plain explanation, the command
    `$ dig AXFR rangelov.dev @ns1.desec.io`, and a `start transfer` button.

@@ -47,10 +47,10 @@ export const guide = {
       here: "certificates I have earned",
     },
     {
-      id: "uri-cname",
-      types: ["URI", "CNAME"],
-      label: "URI, CNAME",
-      means: "URI points a name at a web address. CNAME makes one name an alias of another.",
+      id: "cname",
+      types: ["CNAME"],
+      label: "CNAME",
+      means: "Makes one name an alias of another name.",
       here: "my projects",
     },
     {

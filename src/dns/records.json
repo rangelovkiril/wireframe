@@ -4,17 +4,17 @@
     "type": "SRV",
     "ttl": 3600,
     "records": [
-      "10 80 443 linux.rangelov.dev.",
-      "10 80 443 containers.rangelov.dev.",
-      "10 75 443 actions.rangelov.dev.",
-      "10 70 443 kubernetes.rangelov.dev.",
-      "10 70 443 gitops.rangelov.dev.",
-      "10 70 443 dns.rangelov.dev.",
-      "10 60 443 opentofu.rangelov.dev.",
-      "10 55 443 typescript.rangelov.dev.",
-      "10 50 443 bgp.rangelov.dev.",
-      "10 40 443 elixir.rangelov.dev.",
-      "10 35 443 java.rangelov.dev."
+      "1 80 443 rangelov.dev.",
+      "2 80 443 rangelov.dev.",
+      "3 75 443 rangelov.dev.",
+      "4 70 443 rangelov.dev.",
+      "5 70 443 rangelov.dev.",
+      "6 70 443 rangelov.dev.",
+      "7 60 443 rangelov.dev.",
+      "8 55 443 rangelov.dev.",
+      "9 50 443 rangelov.dev.",
+      "10 40 443 rangelov.dev.",
+      "11 35 443 rangelov.dev."
     ]
   },
   {
@@ -22,19 +22,16 @@
     "type": "CAA",
     "ttl": 86400,
     "records": [
-      "0 issue \"ripe.net; course=lir-fundamentals\"",
-      "0 issue \"ripe.net; course=ipv6-fundamentals\"",
-      "0 issue \"ripe.net; course=ripe-database\"",
-      "0 issue \"ripe.net; course=bgp-security\"",
-      "0 issue \"netacad.com; course=introduction-to-networks\""
+      "0 issue \"ripe.net\"",
+      "0 issue \"netacad.com\""
     ]
   },
   {
     "subname": "protolith",
-    "type": "TXT",
+    "type": "CNAME",
     "ttl": 3600,
     "records": [
-      "\"https://codeberg.org/protolith\""
+      "codeberg.org."
     ]
   },
   {
@@ -47,26 +44,34 @@
   },
   {
     "subname": "rampme",
-    "type": "TXT",
+    "type": "CNAME",
     "ttl": 3600,
     "records": [
-      "\"https://github.com/rangelovkiril/rampme-software\""
+      "github.com."
     ]
   },
   {
     "subname": "atlas",
-    "type": "TXT",
+    "type": "CNAME",
     "ttl": 3600,
     "records": [
-      "\"https://codeberg.org/rangelovkiril/ripe-atlas-ports\""
+      "atlas.ripe.net."
+    ]
+  },
+  {
+    "subname": "atlas-ports",
+    "type": "CNAME",
+    "ttl": 3600,
+    "records": [
+      "codeberg.org."
     ]
   },
   {
     "subname": "lms",
-    "type": "TXT",
+    "type": "CNAME",
     "ttl": 3600,
     "records": [
-      "\"https://github.com/rangelovkiril/lms-controller\""
+      "github.com."
     ]
   },
   {
@@ -79,10 +84,10 @@
   },
   {
     "subname": "tues-web",
-    "type": "TXT",
+    "type": "CNAME",
     "ttl": 3600,
     "records": [
-      "\"https://codeberg.org/rangelovkiril/tues-website-infra\""
+      "elsys.website."
     ]
   },
   {

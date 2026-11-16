@@ -95,7 +95,10 @@ const host = (href: string) => href.replace(/^https?:\/\/(www\.)?/, "").replace(
       <div class="project">
         <div class="project-head">
           {c.logo ? (
-            <img class:list={["logo", { wide: c.logo.includes("devops") }]} src={c.logo} alt={c.logoAlt ?? ""} />
+            <picture>
+              {c.logoDark && <source srcset={c.logoDark} media="(prefers-color-scheme: dark)" />}
+              <img class:list={["logo", { wide: c.logo.includes("devops") }]} src={c.logo} alt={c.logoAlt ?? ""} />
+            </picture>
           ) : (
             c.icon && (
               <svg
@@ -327,6 +330,9 @@ const host = (href: string) => href.replace(/^https?:\/\/(www\.)?/, "").replace(
     font-size: 15px;
   }
 
+  picture {
+    display: contents;
+  }
   .project-head {
     display: flex;
     align-items: center;
@@ -347,13 +353,6 @@ const host = (href: string) => href.replace(/^https?:\/\/(www\.)?/, "").replace(
   }
   .logo.wide {
     height: 64px;
-  }
-  /* The DevOps Club wordmark is the light-background version. */
-  @media (prefers-color-scheme: dark) {
-    .logo.wide {
-      background: #f4f4f2;
-      padding: 6px 10px;
-    }
   }
   .project p {
     max-width: 62ch;

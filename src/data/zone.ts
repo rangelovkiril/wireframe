@@ -75,6 +75,8 @@ export interface RR {
   managed: Managed;
   /** A/AAAA copied from this name's addresses (deSEC has no ALIAS). export-dns checks they still match. */
   copyOf?: string;
+  /** Shown after the record in the zone file. */
+  comment?: string;
 }
 
 export interface Link {
@@ -95,6 +97,7 @@ export type Content =
       kind: "project";
       title: string;
       logo?: string; // path under public/
+      logoDark?: string; // variant for the dark theme
       logoAlt?: string;
       icon?: IconName;
       text: string;
@@ -104,7 +107,7 @@ export type Content =
   | { kind: "list"; title: string; items: string[] }
   | { kind: "contact"; title: string; email: string; links: Link[] };
 
-export type IconName = "bus" | "probe" | "satellite" | "nfc-card" | "globe" | "drone";
+export type IconName = "ramp-bus" | "probe" | "package" | "satellite" | "nfc-card" | "globe" | "drone";
 
 export type SectionGroup = "soa" | "dnskey" | "srv" | "caa" | "projects" | "awards" | "hobbies" | "plans" | "mx";
 
@@ -123,41 +126,48 @@ const VCARD_REPO = "https://codeberg.org/rangelovkiril/contactless-vcard.git";
 // ---------------------------------------------------------------------------
 // SRV: what I work with. The weight is my confidence out of 100.
 
-const skills: { label: string; host: string; weight: number }[] = [
-  { label: "Linux", host: "linux", weight: 80 },
-  { label: "Containers, Podman", host: "containers", weight: 80 },
-  { label: "GitHub and Forgejo Actions", host: "actions", weight: 75 },
-  { label: "Kubernetes", host: "kubernetes", weight: 70 },
-  { label: "Flux, GitOps", host: "gitops", weight: 70 },
-  { label: "DNS", host: "dns", weight: 70 },
-  { label: "OpenTofu", host: "opentofu", weight: 60 },
-  { label: "TypeScript, Bun", host: "typescript", weight: 55 },
-  { label: "BGP", host: "bgp", weight: 50 },
-  { label: "Elixir", host: "elixir", weight: 40 },
-  { label: "Java", host: "java", weight: 35 },
+// Every record points at rangelov.dev. itself: I am the one offering these.
+// The priority is the skill's place in the list, which also keeps the records
+// distinct; the skill's name is a comment in the zone file.
+const skills: { label: string; weight: number }[] = [
+  { label: "Linux", weight: 80 },
+  { label: "Containers, Podman", weight: 80 },
+  { label: "GitHub and Forgejo Actions", weight: 75 },
+  { label: "Kubernetes", weight: 70 },
+  { label: "Flux, GitOps", weight: 70 },
+  { label: "DNS", weight: 70 },
+  { label: "OpenTofu", weight: 60 },
+  { label: "TypeScript, Bun", weight: 55 },
+  { label: "BGP", weight: 50 },
+  { label: "Elixir", weight: 40 },
+  { label: "Java", weight: 35 },
 ];
 
 // ---------------------------------------------------------------------------
-// CAA: certificates. RFC 2181 §5: identical records in an RRset collapse into
-// one, so four bare `0 issue "ripe.net"` records would publish as a single
-// record. Each one carries an RFC 8659 parameter to keep it distinct.
-
+// CAA: one record per issuer (the issuing organisation's domain), the
+// certificates themselves are listed on the page. Cisco's course badge comes
+// from the Networking Academy, so netacad.com rather than cisco.com, which
+// would read like a Cisco certification.
+//
 // badge: file in assets/badges/. RIPE NCC Academy badges may be shown, unmodified,
 // while the certificate is valid (three years; terms and conditions, Art. 8 and 11).
-const certs: { issuer: string; course: string; when: string; domain: string; param: string; badge?: string }[] = [
-  { issuer: "RIPE NCC", course: "LIR Fundamentals", when: "Aug 2026", domain: "ripe.net", param: "lir-fundamentals", badge: "lir-fundamentals.png" },
-  { issuer: "RIPE NCC", course: "IPv6 Fundamentals", when: "Aug 2026", domain: "ripe.net", param: "ipv6-fundamentals", badge: "ipv6-fundamentals.png" },
-  { issuer: "RIPE NCC", course: "RIPE Database", when: "RIPE 93, Oct 2026", domain: "ripe.net", param: "ripe-database", badge: "ripe-database.png" },
-  { issuer: "RIPE NCC", course: "BGP Security", when: "RIPE 93, Oct 2026", domain: "ripe.net", param: "bgp-security", badge: "bgp-security.png" },
-  { issuer: "Cisco", course: "Introduction to Networks", when: "NetAcad", domain: "netacad.com", param: "introduction-to-networks" },
+const certs: { issuer: string; course: string; when: string; domain: string; badge?: string }[] = [
+  { issuer: "RIPE NCC", course: "LIR Fundamentals", when: "Aug 2026", domain: "ripe.net", badge: "lir-fundamentals.png" },
+  { issuer: "RIPE NCC", course: "IPv6 Fundamentals", when: "Aug 2026", domain: "ripe.net", badge: "ipv6-fundamentals.png" },
+  { issuer: "RIPE NCC", course: "RIPE Database", when: "RIPE 93, Oct 2026", domain: "ripe.net", badge: "ripe-database.png" },
+  { issuer: "RIPE NCC", course: "BGP Security", when: "RIPE 93, Oct 2026", domain: "ripe.net", badge: "bgp-security.png" },
+  { issuer: "Cisco", course: "Introduction to Networks", when: "NetAcad", domain: "netacad.com" },
 ];
+const issuers = [...new Set(certs.map((c) => c.domain))];
 
 // ---------------------------------------------------------------------------
 
-const uri = (label: string, target: string): RR => ({
+// A CNAME can only name a host, so a project points at the host its source or
+// site lives on; the full address is the link on the page.
+const cname = (label: string, target: string): RR => ({
   owner: fqdn(label),
   ttl: 3600,
-  rdata: { type: "URI", priority: 10, weight: 1, target },
+  rdata: { type: "CNAME", target },
   managed: "portfolio",
 });
 
@@ -218,11 +228,12 @@ export const sections: Section[] = [
   {
     id: "srv",
     group: "srv",
-    records: skills.map((s) => ({
+    records: skills.map((s, i) => ({
       owner: fqdn("_skills._tcp"),
       ttl: 3600,
-      rdata: { type: "SRV", priority: 10, weight: s.weight, port: 443, target: fqdn(s.host) },
+      rdata: { type: "SRV", priority: i + 1, weight: s.weight, port: 443, target: ORIGIN },
       managed: "portfolio",
+      comment: s.label,
     })),
     content: {
       kind: "skills",
@@ -234,10 +245,10 @@ export const sections: Section[] = [
   {
     id: "caa",
     group: "caa",
-    records: certs.map((c) => ({
+    records: issuers.map((domain) => ({
       owner: fqdn("_certs"),
       ttl: 86400,
-      rdata: { type: "CAA", flags: 0, tag: "issue", value: `${c.domain}; course=${c.param}` },
+      rdata: { type: "CAA", flags: 0, tag: "issue", value: domain },
       managed: "portfolio",
     })),
     content: {
@@ -251,7 +262,7 @@ export const sections: Section[] = [
   {
     id: "protolith",
     group: "projects",
-    records: [uri("protolith", "https://codeberg.org/protolith")],
+    records: [cname("protolith", "codeberg.org.")],
     content: {
       kind: "project",
       title: "Protolith",
@@ -265,18 +276,12 @@ export const sections: Section[] = [
   {
     id: "devops",
     group: "projects",
-    records: [
-      {
-        owner: fqdn("devops"),
-        ttl: 3600,
-        rdata: { type: "CNAME", target: "devops.elsys.club." },
-        managed: "portfolio",
-      },
-    ],
+    records: [cname("devops", "devops.elsys.club.")],
     content: {
       kind: "project",
       title: "TUES DevOps Club",
       logo: "/logos/devops-club.svg",
+      logoDark: "/logos/devops-club-dark.svg",
       logoAlt: "TUES DevOps Club",
       text:
         "The club I founded and run, plus the elsys.club domain that gives school clubs their own subdomains.",
@@ -286,11 +291,11 @@ export const sections: Section[] = [
   {
     id: "rampme",
     group: "projects",
-    records: [uri("rampme", "https://github.com/rangelovkiril/rampme-software")],
+    records: [cname("rampme", "github.com.")],
     content: {
       kind: "project",
       title: "RampMe",
-      icon: "bus",
+      icon: "ramp-bus",
       text:
         "Real-time accessibility for Sofia public transport, with wheelchair-ramp requests sent to the vehicle.",
       award: "3rd place at TUES Fest, showcased at Robotics Strategy Forum 2026",
@@ -300,25 +305,35 @@ export const sections: Section[] = [
   {
     id: "atlas",
     group: "projects",
-    records: [uri("atlas", "https://codeberg.org/rangelovkiril/ripe-atlas-ports")],
+    records: [cname("atlas", "atlas.ripe.net.")],
     content: {
       kind: "project",
       title: "RIPE Atlas probe",
       icon: "probe",
+      text: "I host RIPE Atlas probe 1018643 on a Raspberry Pi 2 and use RIPE Atlas for my own measurements.",
+      links: [{ label: "Probe 1018643 on RIPE Atlas", href: "https://atlas.ripe.net/probes/1018643/" }],
+    },
+  },
+  {
+    id: "atlas-ports",
+    group: "projects",
+    records: [cname("atlas-ports", "codeberg.org.")],
+    content: {
+      kind: "project",
+      title: "RIPE Atlas ports",
+      icon: "package",
       text:
-        "Probe 1018643 on a Raspberry Pi 2, and unofficial signed armhf builds of the software probe.",
-      links: [
-        { label: "ripe-atlas-ports on Codeberg", href: "https://codeberg.org/rangelovkiril/ripe-atlas-ports" },
-      ],
+        "Unofficial armhf builds of the RIPE Atlas software probe, rebuilt automatically from upstream and published as a signed apt repository.",
+      links: [{ label: "Source on Codeberg", href: "https://codeberg.org/rangelovkiril/ripe-atlas-ports" }],
     },
   },
   {
     id: "lms",
     group: "projects",
-    records: [uri("lms", "https://github.com/rangelovkiril/lms-controller")],
+    records: [cname("lms", "github.com.")],
     content: {
       kind: "project",
-      title: "LMS",
+      title: "Light My Satellite (LMS)",
       icon: "satellite",
       text: "A distributed satellite laser ranging mini-station with a real-time 3D view.",
       award: "TUES Fest, national IT olympiad",
@@ -349,15 +364,16 @@ export const sections: Section[] = [
   {
     id: "tues-web",
     group: "projects",
-    records: [uri("tues-web", "https://codeberg.org/rangelovkiril/tues-website-infra")],
+    records: [cname("tues-web", "elsys.website.")],
     content: {
       kind: "project",
       title: "TUES website infrastructure",
       icon: "globe",
       text:
-        "Infrastructure for a new school website: Terraform on Azure Container Apps with OIDC deploys, plus a scraper that moved about 1,830 records from the old site into Directus. Paused while the school decides what it wants.",
+        "A proposal, not an official school project: infrastructure for a new school website. It started as a k3s cluster and moved to Terraform on Azure Container Apps with OIDC deploys, plus a scraper that moved about 1,830 records from the old site into Directus. Paused while the school decides what it wants.",
       links: [
-        { label: "Infra on Codeberg", href: "https://codeberg.org/rangelovkiril/tues-website-infra" },
+        { label: "k3s setup on Codeberg", href: "https://codeberg.org/rangelovkiril/tues-website-infra" },
+        { label: "Azure setup on GitHub", href: "https://github.com/TUES-2026-PBL-11-klas/websaitut-infra" },
       ],
     },
   },
