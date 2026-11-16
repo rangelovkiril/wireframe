@@ -89,7 +89,7 @@ export type Content =
   | {
       kind: "certs";
       title: string;
-      items: { issuer: string; course: string; when: string; domain: string }[];
+      items: { issuer: string; course: string; when: string; domain: string; badge?: string }[];
     }
   | {
       kind: "project";
@@ -142,11 +142,13 @@ const skills: { label: string; host: string; weight: number }[] = [
 // one, so four bare `0 issue "ripe.net"` records would publish as a single
 // record. Each one carries an RFC 8659 parameter to keep it distinct.
 
-const certs: { issuer: string; course: string; when: string; domain: string; param: string }[] = [
-  { issuer: "RIPE NCC", course: "LIR Fundamentals", when: "Aug 2026", domain: "ripe.net", param: "lir-fundamentals" },
-  { issuer: "RIPE NCC", course: "IPv6 Fundamentals", when: "Aug 2026", domain: "ripe.net", param: "ipv6-fundamentals" },
-  { issuer: "RIPE NCC", course: "RIPE Database", when: "RIPE 93, Oct 2026", domain: "ripe.net", param: "ripe-database" },
-  { issuer: "RIPE NCC", course: "BGP Security", when: "RIPE 93, Oct 2026", domain: "ripe.net", param: "bgp-security" },
+// badge: file in assets/badges/. RIPE NCC Academy badges may be shown, unmodified,
+// while the certificate is valid (three years; terms and conditions, Art. 8 and 11).
+const certs: { issuer: string; course: string; when: string; domain: string; param: string; badge?: string }[] = [
+  { issuer: "RIPE NCC", course: "LIR Fundamentals", when: "Aug 2026", domain: "ripe.net", param: "lir-fundamentals", badge: "lir-fundamentals.png" },
+  { issuer: "RIPE NCC", course: "IPv6 Fundamentals", when: "Aug 2026", domain: "ripe.net", param: "ipv6-fundamentals", badge: "ipv6-fundamentals.png" },
+  { issuer: "RIPE NCC", course: "RIPE Database", when: "RIPE 93, Oct 2026", domain: "ripe.net", param: "ripe-database", badge: "ripe-database.png" },
+  { issuer: "RIPE NCC", course: "BGP Security", when: "RIPE 93, Oct 2026", domain: "ripe.net", param: "bgp-security", badge: "bgp-security.png" },
   { issuer: "Cisco", course: "Introduction to Networks", when: "NetAcad", domain: "netacad.com", param: "introduction-to-networks" },
 ];
 
@@ -241,7 +243,7 @@ export const sections: Section[] = [
     content: {
       kind: "certs",
       title: "Certified by",
-      items: certs.map(({ issuer, course, when, domain }) => ({ issuer, course, when, domain })),
+      items: certs.map(({ issuer, course, when, domain, badge }) => ({ issuer, course, when, domain, badge })),
     },
   },
 

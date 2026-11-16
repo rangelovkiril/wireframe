@@ -164,6 +164,10 @@ BGP 50 · Elixir 40 · Java 35
 - RIPE NCC: BGP Security, RIPE 93, Oct 2026, `ripe.net`
 - Cisco: Introduction to Networks, NetAcad, `netacad.com`
 
+The four RIPE NCC entries show their RIPE NCC Academy badge (`assets/badges/`,
+unmodified apart from scaling; allowed while the certificate is valid). The
+Cisco entry is text only.
+
 **Projects** (logo or icon, title, text, award, links; links always visible):
 - **Protolith** (logo `protolith.svg`): A sovereign DevOps platform built from free software (Forgejo, Harbor, OpenBao), with SLSA Build L3 compatible builds, running on European cloud. My diploma thesis.
 - **TUES DevOps Club** (logo `devops-club.svg`, the full wordmark, never just the wheel): The club I founded and run, plus the elsys.club domain that gives school clubs their own subdomains. Link: devops.elsys.club
@@ -212,8 +216,9 @@ Dark, via `prefers-color-scheme: dark` only (no toggle):
 --muted #A3A39A  --line #2C2C29  --accent #6FA3F0  --ok #6CC27A
 orange #F08A3C  brown #C79562  green #6CC27A  blue #6FA3F0
 ```
-No purple anywhere. No gradients, no shadows, no rounded cards, no borders
-around records or types.
+No purple anywhere (the RIPE NCC badges keep their own colours). No gradients,
+no shadows, no rounded cards, no borders around records or types. No arrow
+symbols (→, ↓ and the like) in text or decoration.
 
 ### Type
 - Sans: Hanken Grotesk (400/500/700/800/900). Name in 900.
