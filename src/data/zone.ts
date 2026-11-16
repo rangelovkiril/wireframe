@@ -22,6 +22,13 @@ export const transfer = {
   failed: ";; transfer failed, download the file instead",
 };
 
+export const notFound = {
+  title: "NXDOMAIN · Kiril Rangelov",
+  header: ";; ->>HEADER<<- opcode: QUERY, status: NXDOMAIN",
+  text: "This name does not exist in the rangelov.dev zone.",
+  back: "Back to the zone",
+};
+
 export const footer = {
   built: "Built with Astro, served by GitHub Pages.",
   dnssec: { label: "DNSSEC by deSEC", href: "https://desec.io" },

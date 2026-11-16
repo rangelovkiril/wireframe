@@ -1,12 +1,11 @@
 ---
-import { Font } from "astro:assets";
-import "../styles/global.css";
+import Base from "../layouts/Base.astro";
 import Hero from "../components/Hero.astro";
 import Guide from "../components/Guide.astro";
 import Record from "../components/Record.astro";
 import ZoneTransfer from "../components/ZoneTransfer.astro";
 import VerifyDialog from "../components/VerifyDialog.astro";
-import { footer, profile } from "../data/zone.ts";
+import { footer } from "../data/zone.ts";
 import { liveSections } from "../lib/live.ts";
 import { dnskeyRandomart } from "../lib/randomart.ts";
 
@@ -15,18 +14,7 @@ const dnskey = sections.flatMap((s) => s.records).find((r) => r.rdata.type === "
 const randomart = dnskey?.type === "DNSKEY" ? await dnskeyRandomart(dnskey.key) : undefined;
 ---
 
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{profile.name}</title>
-    <meta name="description" content={profile.tagline} />
-    <link rel="canonical" href={Astro.site} />
-    <Font cssVariable="--font-hanken" preload />
-    <Font cssVariable="--font-sometype" preload />
-  </head>
-  <body>
+<Base>
     <div class="page">
       <Hero />
       <main>
@@ -47,8 +35,7 @@ const randomart = dnskey?.type === "DNSKEY" ? await dnskeyRandomart(dnskey.key) 
         </a>
       </footer>
     </div>
-  </body>
-</html>
+</Base>
 
 <style>
   .records {

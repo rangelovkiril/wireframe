@@ -24,7 +24,12 @@ your defaults, this file wins.
 - Client JS only where listed under "Interactivity", as plain `<script>` tags
   inside Astro components. Keep it small.
 - Hosted on GitHub Pages, deployed by GitHub Actions with the official
-  `withastro/action` + `actions/deploy-pages`.
+  `withastro/action` + `actions/deploy-pages`. A `check` job (bun check,
+  bun test, build, named-checkzone) runs first; the workflow also runs daily
+  so the SOA serial and DNSKEY fetched at build time stay current.
+- `layouts/Base.astro` holds the shared `<head>`: favicon (`public/favicon.svg`,
+  the root zone's dot), Open Graph tags and `public/og.png` (1200×630).
+  `pages/404.astro` is an NXDOMAIN page.
 - Custom domain `portfolio.rangelov.dev` (add `public/CNAME`). The apex
   `rangelov.dev` serves the NFC vCard from Codeberg Pages (A/AAAA copied from
   `codeberg.page`, since deSEC has no ALIAS); don't point it at this site.
