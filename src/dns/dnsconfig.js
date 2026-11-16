@@ -18,6 +18,8 @@ D("rangelov.dev", REG_NONE,
 	// rangelov.dev. MX
 	MX("@", 10, "mail.protonmail.ch."),
 	MX("@", 20, "mailsec.protonmail.ch."),
+	// _github-pages-challenge-rangelovkiril.rangelov.dev. TXT
+	TXT("_github-pages-challenge-rangelovkiril", "7a8af9eb2030e6f6c99d4f252e8b9c"),
 	// rangelov.dev. TXT
 	TXT("@", "v=spf1 include:_spf.protonmail.ch ~all"),
 	TXT("@", "protonmail-verification=1554c8c567c39ca28c9d28989d8469deaf895b01"),

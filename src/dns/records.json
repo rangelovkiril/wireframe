@@ -135,6 +135,14 @@
     ]
   },
   {
+    "subname": "_github-pages-challenge-rangelovkiril",
+    "type": "TXT",
+    "ttl": 3600,
+    "records": [
+      "\"7a8af9eb2030e6f6c99d4f252e8b9c\""
+    ]
+  },
+  {
     "subname": "",
     "type": "TXT",
     "ttl": 3600,

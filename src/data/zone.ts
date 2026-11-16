@@ -462,6 +462,9 @@ export const extraRecords: RR[] = [
     rdata: { type: "CNAME", target: "rangelovkiril.github.io." },
     managed: "portfolio",
   },
+  // GitHub Pages domain verification for the account: no other GitHub account
+  // can take over rangelov.dev or any subdomain of it.
+  infra("_github-pages-challenge-rangelovkiril", { type: "TXT", strings: ["7a8af9eb2030e6f6c99d4f252e8b9c"] }),
 
   // Proton Mail (the MX records are the MX section above)
   infra("@", { type: "TXT", strings: ["v=spf1 include:_spf.protonmail.ch ~all"] }),
