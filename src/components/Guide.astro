@@ -19,7 +19,7 @@ const filterCss = guide.rows
     {
       guide.rows.map((row) => (
         <label class="row" style={`--c: var(--t-${row.types[0]})`}>
-          <input type="radio" name="filter" id={`f-${row.id}`} value={row.id} data-types={row.types.join(" ")} />
+          <input type="radio" name="filter" id={`f-${row.id}`} value={row.id} data-types={row.types.join(" ")} autocomplete="off" />
           <span class="type">{row.label}</span>
           <span class="means">{row.means}</span>
           <span class="here">{row.here}</span>
@@ -27,7 +27,7 @@ const filterCss = guide.rows
       ))
     }
     <label class="show-all">
-      <input type="radio" name="filter" id="f-all" value="all" checked />
+      <input type="radio" name="filter" id="f-all" value="all" checked autocomplete="off" />
       <span>{guide.showAll}</span>
     </label>
   </fieldset>
@@ -44,6 +44,14 @@ const filterCss = guide.rows
   const types: Record<string, string[]> = {};
   for (const r of radios) types[r.id] = (r.dataset.types ?? "").split(" ");
 
+  // Choosing a type opens its records.
+  const openType = (radio: HTMLInputElement) => {
+    if (radio === all) return;
+    for (const r of records) {
+      if (types[radio.id]?.includes(r.dataset.type ?? "")) r.querySelector("details")?.setAttribute("open", "");
+    }
+  };
+
   // Tapping the selected type again clears the filter.
   let current = radios.find((r) => r.checked);
   for (const radio of radios) {
@@ -55,14 +63,35 @@ const filterCss = guide.rows
         current = radio;
       }
     });
-    // Choosing a type opens its records.
     radio.addEventListener("change", () => {
-      if (!radio.checked || radio === all) return;
-      for (const r of records) {
-        if (types[radio.id]?.includes(r.dataset.type ?? "")) r.querySelector("details")?.setAttribute("open", "");
-      }
+      if (radio.checked) openType(radio);
     });
   }
+
+  // A browser can bring back the chosen type on reload or Back without a
+  // change event; the CSS filter applies, so open the records it shows.
+  const restore = () => {
+    current = radios.find((r) => r.checked);
+    if (current) openType(current);
+  };
+  restore();
+  addEventListener("pageshow", restore);
+
+  // A link to a record (#srv, #protolith, ...) opens it, clearing a filter
+  // that would hide it.
+  const openTarget = () => {
+    const id = decodeURIComponent(location.hash.slice(1));
+    const record = id ? document.getElementById(id)?.closest<HTMLElement>(".record") : null;
+    if (!record) return;
+    if (getComputedStyle(record).display === "none" && all) {
+      all.checked = true;
+      current = all;
+    }
+    record.querySelector("details")?.setAttribute("open", "");
+    record.scrollIntoView();
+  };
+  openTarget();
+  addEventListener("hashchange", openTarget);
 
   // Open all / Close all, kept in sync with records opened by hand.
   const button = document.querySelector<HTMLButtonElement>("button.open-all");
