@@ -287,7 +287,12 @@ everything is still visible and readable.
 3. **Live verify.** A small `verify` button per record. Query
    `https://dns.google/resolve?name=<fqdn>&type=<TYPE>&do=1` (JSON, CORS
    allowed). Show `✓ live, signed` if it resolves with `"AD": true`,
-   `✓ live` without AD, `not published yet` otherwise.
+   `✓ live` without AD, `not published yet` otherwise. The result opens in a
+   `<dialog>` (`components/VerifyDialog.astro`): the verdict with a plain
+   explanation, the raw answer from dns.google including the RRSIG, whether it
+   matches the record on the page (TXT compared with its strings joined, SOA by
+   its names only), and the `dig +dnssec` command to check it yourself. The
+   verdict also stays as a small row under the record.
 4. **Randomart at build time.** In `randomart.ts`, fetch the zone's DNSKEY
    (flag 257) over DoH during the build, SHA-256 the key, and run the
    OpenSSH drunken-bishop walk (17×9 field, same symbols as

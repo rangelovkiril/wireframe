@@ -31,9 +31,44 @@ export async function lookup(name: string, type: QueryType, signal?: AbortSignal
 
 export type Verdict = "signed" | "live" | "missing";
 
-/** Is the record published? "signed" when the resolver validated it with DNSSEC (AD). */
-export async function verify(name: string, type: QueryType, signal?: AbortSignal): Promise<Verdict> {
+const NAMES: Record<number, string> = { ...Object.fromEntries(Object.entries(TYPE).map(([k, v]) => [v, k])), 46: "RRSIG" };
+
+/**
+ * Rdata in a form both sides agree on: dns.google joins the strings of a TXT
+ * record, and an SOA is compared by its names only (the serial moves on with
+ * every change to the zone).
+ */
+export function comparable(type: string, data: string): string {
+  let d = data.trim().replace(/\s+/g, " ");
+  if (type === "TXT" && d.startsWith('"')) {
+    d = [...d.matchAll(/"((?:[^"\\]|\\.)*)"/g)].map((m) => m[1]!.replace(/\\(.)/g, "$1")).join("");
+  }
+  if (type === "SOA") d = d.split(" ").slice(0, 2).join(" ");
+  return d.toLowerCase();
+}
+
+export interface Check {
+  verdict: Verdict;
+  /** The answer, one zone-file line per record, signatures included. */
+  lines: string[];
+  /** Whether the published RRset is exactly the one given (compared with `comparable`). */
+  matches: boolean;
+}
+
+/** Look the record up and compare it with what the page shows. */
+export async function check(name: string, type: QueryType, expected: string[], signal?: AbortSignal): Promise<Check> {
   const r = await resolve(name, type, signal);
-  const found = r.Status === 0 && (r.Answer ?? []).some((a) => a.type === TYPE[type]);
-  return !found ? "missing" : r.AD ? "signed" : "live";
+  const answers = r.Answer ?? [];
+  const own = answers.filter((a) => a.type === TYPE[type]);
+  const verdict: Verdict = r.Status !== 0 || own.length === 0 ? "missing" : r.AD ? "signed" : "live";
+  const norm = (xs: string[]) => xs.map((x) => comparable(type, x)).sort().join("\n");
+  return {
+    verdict,
+    // dns.google shuffles an RRset: sort it, signatures last
+    lines: [
+      ...[...own].sort((a, b) => a.data.localeCompare(b.data, "en", { numeric: true })),
+      ...answers.filter((a) => a.type !== TYPE[type]),
+    ].map((a) => `${a.name} ${a.TTL} IN ${NAMES[a.type] ?? a.type} ${a.data}`),
+    matches: own.length > 0 && norm(own.map((a) => a.data)) === norm(expected),
+  };
 }

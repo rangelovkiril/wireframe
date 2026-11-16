@@ -4,7 +4,7 @@ import { Image } from "astro:assets";
 import LinkLogo from "./LinkLogo.astro";
 import { ORIGIN, type Section } from "../data/zone.ts";
 import { ui } from "../data/guide.ts";
-import { displayRdata } from "../lib/zonefile.ts";
+import { displayRdata, formatRdata } from "../lib/zonefile.ts";
 import { icons } from "../lib/icons.ts";
 
 interface Props {
@@ -189,45 +189,17 @@ const host = (href: string) => href.replace(/^https?:\/\/(www\.)?/, "").replace(
     )}
   </div>
 </details>
-<button type="button" class="verify" data-name={first.owner} data-type={type} hidden>{ui.verify}</button>
+<button
+  type="button"
+  class="verify"
+  data-name={first.owner}
+  data-type={type}
+  data-expect={JSON.stringify(section.records.map((r) => formatRdata(r.rdata)))}
+  aria-haspopup="dialog"
+  hidden>{ui.verify}</button
+>
 </div>
 
-<script>
-  import { verify, type QueryType } from "../lib/doh.ts";
-  import { ui } from "../data/guide.ts";
-
-  // One live region for all results; the visible verdict sits in the summary.
-  const announce = document.createElement("p");
-  announce.setAttribute("role", "status");
-  announce.className = "visually-hidden";
-  document.body.append(announce);
-
-  for (const button of document.querySelectorAll<HTMLButtonElement>("button.verify")) {
-    const out = button.closest(".record")?.querySelector<HTMLElement>(".verdict");
-    const { name = "", type = "" } = button.dataset;
-    button.hidden = false;
-    button.addEventListener("click", async () => {
-      button.disabled = true;
-      button.textContent = ui.checking;
-      let text: string;
-      let ok = false;
-      try {
-        const v = await verify(name, type as QueryType, AbortSignal.timeout(8000));
-        text = ui[v];
-        ok = v !== "missing";
-      } catch {
-        text = ui.failed;
-      }
-      if (out) {
-        out.textContent = text;
-        out.classList.toggle("ok", ok);
-      }
-      announce.textContent = `${name} ${type}: ${text}`;
-      button.textContent = ui.verify;
-      button.disabled = false;
-    });
-  }
-</script>
 
 <style>
   .record {

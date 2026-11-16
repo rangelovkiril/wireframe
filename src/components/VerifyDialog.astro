@@ -1,0 +1,171 @@
+---
+// One dialog for every record's verify button: what a public resolver
+// answered, whether it was DNSSEC-validated, and whether it matches the page.
+import { ui } from "../data/guide.ts";
+---
+
+<dialog class="verify-dialog" aria-labelledby="vd-title">
+  <div class="head">
+    <h2 id="vd-title"></h2>
+    <form method="dialog"><button class="close" aria-label={ui.close}>×</button></form>
+  </div>
+  <p class="verdict" aria-live="polite"></p>
+  <p class="explain"></p>
+  <h3 class="answer-title" hidden>{ui.answer}</h3>
+  <pre class="answer" tabindex="0" hidden></pre>
+  <p class="match" hidden></p>
+  <h3>{ui.yourself}</h3>
+  <pre class="dig"></pre>
+  <p class="doh"><a target="_blank" rel="noopener">dns.google</a></p>
+</dialog>
+
+<script>
+  import { check, type QueryType } from "../lib/doh.ts";
+  import { ui } from "../data/guide.ts";
+
+  const dialog = document.querySelector<HTMLDialogElement>("dialog.verify-dialog")!;
+  const $ = <T extends HTMLElement>(s: string) => dialog.querySelector<T>(s)!;
+  const title = $("#vd-title");
+  const verdict = $(".verdict");
+  const explain = $(".explain");
+  const answerTitle = $(".answer-title");
+  const answer = $<HTMLPreElement>(".answer");
+  const match = $(".match");
+  const dig = $<HTMLPreElement>(".dig");
+  const doh = $<HTMLAnchorElement>(".doh a");
+
+  // Close when the backdrop is clicked.
+  dialog.addEventListener("click", (e) => {
+    if (e.target === dialog) dialog.close();
+  });
+
+  let run = 0;
+  for (const button of document.querySelectorAll<HTMLButtonElement>("button.verify")) {
+    const row = button.closest(".record")?.querySelector<HTMLElement>(".verdict");
+    const { name = "", type = "", expect = "[]" } = button.dataset;
+    button.hidden = false;
+    button.addEventListener("click", async () => {
+      const me = ++run;
+      title.textContent = `${name} ${type}`;
+      verdict.textContent = ui.checking;
+      verdict.className = "verdict";
+      explain.textContent = "";
+      answerTitle.hidden = answer.hidden = match.hidden = true;
+      dig.textContent = `$ dig +dnssec ${type} ${name}`;
+      doh.href = `https://dns.google/resolve?name=${encodeURIComponent(name)}&type=${type}&do=1`;
+      dialog.showModal();
+
+      let c: Awaited<ReturnType<typeof check>> | undefined;
+      try {
+        c = await check(name, type as QueryType, JSON.parse(expect), AbortSignal.timeout(8000));
+      } catch {}
+      const ok = !!c && c.verdict !== "missing";
+      const text = c ? ui[c.verdict] : ui.failed;
+
+      // The record's own row always gets its result...
+      if (row) {
+        row.textContent = text;
+        row.classList.toggle("ok", ok);
+      }
+      // ...the dialog only shows the latest check.
+      if (me !== run) return;
+      verdict.textContent = text;
+      verdict.classList.toggle("ok", ok);
+      explain.textContent = c ? ui.explain[c.verdict] : ui.explain.failed;
+      if (c?.lines.length) {
+        answer.textContent = c.lines.join("\n");
+        answerTitle.hidden = answer.hidden = false;
+      }
+      if (c && ok) {
+        match.textContent = (c.matches ? ui.matches : ui.differs) + (type === "SOA" ? ` ${ui.soaNote}` : "");
+        match.className = c.matches ? "match ok" : "match bad";
+        match.hidden = false;
+      }
+    });
+  }
+</script>
+
+<style>
+  dialog {
+    width: min(100vw - 24px, 680px);
+    max-height: min(100dvh - 24px, 760px);
+    padding: 20px 20px 24px;
+    border: 1px solid var(--line);
+    background: var(--bg);
+    color: var(--text);
+    overflow-y: auto;
+  }
+  dialog::backdrop {
+    background: rgb(0 0 0 / 0.55);
+  }
+  .head {
+    display: flex;
+    align-items: start;
+    gap: 12px;
+  }
+  h2 {
+    flex: 1;
+    min-width: 0;
+    margin: 10px 0 0;
+    font: 700 clamp(16px, 4.2vw, 20px) / 1.35 var(--mono);
+    overflow-wrap: anywhere;
+  }
+  .close {
+    min-width: 44px;
+    min-height: 44px;
+    border: 0;
+    background: var(--panel);
+    color: var(--text);
+    font: 400 26px/1 var(--sans);
+    cursor: pointer;
+  }
+  .close:hover {
+    background: var(--surface);
+  }
+  .verdict {
+    margin: 16px 0 4px;
+    font: 700 18px var(--mono);
+  }
+  .verdict.ok,
+  .match.ok {
+    color: var(--ok);
+  }
+  .match.bad {
+    color: var(--t-SOA);
+  }
+  .explain {
+    color: var(--muted);
+  }
+  h3 {
+    margin: 20px 0 8px;
+    font-size: 15px;
+    font-weight: 700;
+  }
+  pre {
+    margin: 0;
+    padding: 12px;
+    background: var(--panel);
+    font-size: 12px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+  .answer {
+    max-height: 40vh;
+    overflow-y: auto;
+  }
+  .match {
+    margin: 12px 0 0;
+    font-weight: 700;
+  }
+  .doh {
+    margin: 8px 0 0;
+  }
+  .doh a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-family: var(--mono);
+    font-size: 14px;
+  }
+</style>

@@ -70,7 +70,7 @@ export const guide = {
   ] satisfies GuideRow[],
 };
 
-/** Labels for the live check of each record. */
+/** Labels for the live check of each record and the dialog that shows it. */
 export const ui = {
   verify: "verify",
   checking: "checking…",
@@ -78,4 +78,16 @@ export const ui = {
   live: "✓ live",
   missing: "not published yet",
   failed: "lookup failed",
+  explain: {
+    signed: "A public resolver found this record and validated its DNSSEC signature, so the answer is the one the zone published.",
+    live: "A public resolver found this record, but did not validate a DNSSEC signature for it.",
+    missing: "A public resolver has no record of this type for this name, so it is not published yet.",
+    failed: "The lookup did not finish. Try again, or ask DNS yourself:",
+  },
+  answer: "What dns.google answered",
+  matches: "Same as the record on this page.",
+  differs: "Not the same as the record on this page.",
+  soaNote: "Compared by name: the serial grows with every change to the zone.",
+  yourself: "Check it yourself",
+  close: "Close",
 };

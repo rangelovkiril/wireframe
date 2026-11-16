@@ -5,6 +5,7 @@ import Hero from "../components/Hero.astro";
 import Guide from "../components/Guide.astro";
 import Record from "../components/Record.astro";
 import ZoneTransfer from "../components/ZoneTransfer.astro";
+import VerifyDialog from "../components/VerifyDialog.astro";
 import { footer, profile } from "../data/zone.ts";
 import { liveSections } from "../lib/live.ts";
 import { dnskeyRandomart } from "../lib/randomart.ts";
@@ -37,6 +38,7 @@ const randomart = dnskey?.type === "DNSKEY" ? await dnskeyRandomart(dnskey.key) 
         </section>
         <ZoneTransfer />
       </main>
+      <VerifyDialog />
       <footer class="footer">
         <p>{footer.built}</p>
         <a href={footer.dnssec.href}>
