@@ -2,12 +2,68 @@
 import { transfer } from "../data/zone.ts";
 ---
 
-<section class="transfer" aria-labelledby="transfer-heading">
+<section class="transfer" aria-labelledby="transfer-heading" data-file={transfer.file} data-size={transfer.size} data-failed={transfer.failed}>
   <h2 id="transfer-heading">{transfer.title}</h2>
   <p>{transfer.text}</p>
   <pre class="command"><code>{transfer.command}</code></pre>
+  <button type="button" class="start" hidden>{transfer.start}</button>
+  <pre class="zone" tabindex="0" aria-label="rangelov.dev zone file" hidden></pre>
+  <p class="size" role="status"></p>
   <a class="download" href={transfer.file} download>{transfer.download}</a>
 </section>
+
+<script>
+  // Without JS the panel is just the download link. With JS: stream the
+  // generated zone file into the <pre>, one line every 60 ms.
+  const panel = document.querySelector<HTMLElement>(".transfer");
+  const start = panel?.querySelector<HTMLButtonElement>("button.start");
+  const pre = panel?.querySelector<HTMLPreElement>("pre.zone");
+  const size = panel?.querySelector<HTMLElement>(".size");
+  const link = panel?.querySelector<HTMLAnchorElement>("a.download");
+
+  if (panel && start && pre && size && link) {
+    const { file = "", size: template = "", failed = "" } = panel.dataset;
+    const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+    // The file is aligned in columns; on screen each record is one wrapped line.
+    const show = (line: string) => {
+      const row = document.createElement("span");
+      row.textContent = line.replace(/ {2,}/g, " ");
+      pre.append(row);
+    };
+    start.hidden = false;
+    link.hidden = true;
+
+    start.addEventListener("click", async () => {
+      start.disabled = true;
+      link.hidden = true;
+      size.textContent = "";
+      pre.textContent = "";
+      pre.hidden = false;
+      pre.setAttribute("aria-busy", "true");
+      try {
+        const res = await fetch(file);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const lines = (await res.text()).trimEnd().split("\n");
+        if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
+          lines.forEach(show);
+        } else {
+          for (const line of lines) {
+            show(line);
+            pre.scrollTop = pre.scrollHeight;
+            await sleep(60);
+          }
+        }
+        const records = lines.filter((l) => l.trim() && !l.startsWith(";") && !l.startsWith("$")).length;
+        size.textContent = template.replace("{n}", String(records));
+      } catch {
+        size.textContent = failed;
+      }
+      pre.removeAttribute("aria-busy");
+      link.hidden = false;
+      start.disabled = false;
+    });
+  }
+</script>
 
 <style>
   .transfer {
@@ -38,10 +94,51 @@ import { transfer } from "../data/zone.ts";
     white-space: pre-wrap;
     overflow-wrap: anywhere;
   }
+  .start {
+    min-height: 44px;
+    padding: 0 18px;
+    border: 0;
+    background: var(--text);
+    color: var(--bg);
+    font: 700 15px var(--mono);
+    cursor: pointer;
+  }
+  .start:disabled {
+    background: var(--muted);
+    cursor: progress;
+  }
+  .zone {
+    margin: 16px 0 0;
+    padding: 12px 0;
+    max-height: 60vh;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--text);
+  }
+  /* one record per block, continuation lines indented */
+  .zone :global(span) {
+    display: block;
+    padding-left: 2ch;
+    text-indent: -2ch;
+  }
+  .size {
+    font-family: var(--mono);
+    font-size: 13px;
+    margin: 8px 0 0;
+  }
+  .size:empty {
+    display: none;
+  }
   .download {
     display: inline-flex;
     align-items: center;
     min-height: 44px;
     font-weight: 700;
+  }
+  .download[hidden] {
+    display: none;
   }
 </style>

@@ -183,8 +183,11 @@ Cisco entry is text only.
 
 Icons: simple 24×24 inline stroke SVGs (currentColor, stroke 1.6).
 
-Every link to codeberg.org or github.com (projects and contact) has the forge's
-logo on its left (`components/Forge.astro`), in the official light/dark
+The email address has a plain envelope icon. Every link to codeberg.org,
+github.com or linkedin.com has that site's logo on its left
+(`components/LinkLogo.astro`; LinkedIn appears once its official "in" logo is
+saved as `public/logos/linkedin.svg`, optional `linkedin-white.svg`, at 21px,
+LinkedIn's minimum), in the official light/dark
 variants and otherwise unmodified: Codeberg's is CC0 (trademark of Codeberg
 e.V.), GitHub's is the MIT-licensed octicons mark, used as a link to a
 repository as github.com/logos allows. License notes are inside the SVGs.
@@ -238,7 +241,9 @@ symbols (→, ↓ and the like) in text or decoration.
 Large mono heading, about `clamp(17px, 4.6vw, 24px)`, always on two rows so
 it never breaks in odd places on a phone:
 - row 1: fqdn (bold, text colour) with the `verify` button on the right
-- row 2: `ttl IN` (muted), TYPE (bold, type colour), rdata (muted; may wrap)
+- row 2: `ttl IN` (muted), TYPE (bold, type colour), rdata (muted; may wrap),
+  with the `+`/`−` marker on the right
+- after a check, the verify result as a small third row
 
 Every record section starts with a 1px top rule in `--line` and ~28px of
 space, so records are clearly separated. Content sits under the record line

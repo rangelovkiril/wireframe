@@ -1,0 +1,43 @@
+---
+// The logo of the site a link points to (Codeberg, GitHub, LinkedIn), in the
+// official light/dark variants from public/logos/; nothing for other links or
+// when the file is missing. Decorative: the link text names the site.
+import { existsSync } from "node:fs";
+import { join } from "node:path";
+
+interface Props {
+  href: string;
+}
+
+const sites: Record<string, string> = {
+  "codeberg.org": "codeberg",
+  "github.com": "github",
+  "www.linkedin.com": "linkedin",
+  "linkedin.com": "linkedin",
+};
+const name = sites[new URL(Astro.props.href).hostname];
+const has = (file: string) => existsSync(join(process.cwd(), "public", "logos", file));
+const light = name && has(`${name}.svg`) ? `/logos/${name}.svg` : undefined;
+const dark = name && has(`${name}-white.svg`) ? `/logos/${name}-white.svg` : undefined;
+---
+
+{
+  light && (
+    <picture>
+      {dark && <source srcset={dark} media="(prefers-color-scheme: dark)" />}
+      <img class="site-logo" src={light} alt="" width="21" height="21" />
+    </picture>
+  )
+}
+
+<style>
+  picture {
+    display: flex;
+    flex: none;
+  }
+  /* 21px: LinkedIn's minimum on screen */
+  .site-logo {
+    width: 21px;
+    height: 21px;
+  }
+</style>

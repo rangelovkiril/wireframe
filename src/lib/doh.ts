@@ -28,3 +28,12 @@ export async function lookup(name: string, type: QueryType, signal?: AbortSignal
   const r = await resolve(name, type, signal);
   return (r.Answer ?? []).filter((a) => a.type === TYPE[type]).map((a) => a.data);
 }
+
+export type Verdict = "signed" | "live" | "missing";
+
+/** Is the record published? "signed" when the resolver validated it with DNSSEC (AD). */
+export async function verify(name: string, type: QueryType, signal?: AbortSignal): Promise<Verdict> {
+  const r = await resolve(name, type, signal);
+  const found = r.Status === 0 && (r.Answer ?? []).some((a) => a.type === TYPE[type]);
+  return !found ? "missing" : r.AD ? "signed" : "live";
+}

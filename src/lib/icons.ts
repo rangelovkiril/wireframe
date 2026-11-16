@@ -3,7 +3,9 @@
 
 import type { IconName } from "../data/zone.ts";
 
-export const icons: Record<IconName, string> = {
+export const icons: Record<IconName | "mail", string> = {
+  // envelope, next to the email address
+  mail: '<rect x="2.5" y="5" width="19" height="14" rx="1.5"/><path d="m3 6.5 9 6.5 9-6.5"/>',
   // wheelchair user, ramp down from the bus door, bus seen from the front
   "ramp-bus": '<circle cx="4.6" cy="6.2" r="1.3"/><path d="M4.6 9.2v4.3h3.6l1.7 3.7"/><path d="M3 11.7a3.6 3.6 0 1 0 4.9 5"/><rect x="13" y="2.5" width="10" height="16" rx="1.5"/><path d="M14.6 4.8h6.8v6.4h-6.8z"/><path d="M14.8 15.2h1.6M19.6 15.2h1.6M14.6 18.5v1.5M21.4 18.5v1.5"/><path d="M13 18.5 9.6 20.5H1.5"/>',
   // RIPE Atlas probe with antenna

@@ -19,7 +19,7 @@ const filterCss = guide.rows
     {
       guide.rows.map((row) => (
         <label class="row" style={`--c: var(--t-${row.types[0]})`}>
-          <input type="radio" name="filter" id={`f-${row.id}`} value={row.id} />
+          <input type="radio" name="filter" id={`f-${row.id}`} value={row.id} data-types={row.types.join(" ")} />
           <span class="type">{row.label}</span>
           <span class="means">{row.means}</span>
           <span class="here">{row.here}</span>
@@ -31,7 +31,56 @@ const filterCss = guide.rows
       <span>{guide.showAll}</span>
     </label>
   </fieldset>
+  <button type="button" class="open-all" data-open={guide.openAll} data-close={guide.closeAll} hidden>
+    {guide.openAll}
+  </button>
 </section>
+
+<script>
+  const radios = [...document.querySelectorAll<HTMLInputElement>('input[name="filter"]')];
+  const all = document.querySelector<HTMLInputElement>("#f-all");
+  const records = [...document.querySelectorAll<HTMLElement>(".record")];
+  const details = () => records.map((r) => r.querySelector("details")).filter((d) => d !== null);
+  const types: Record<string, string[]> = {};
+  for (const r of radios) types[r.id] = (r.dataset.types ?? "").split(" ");
+
+  // Tapping the selected type again clears the filter.
+  let current = radios.find((r) => r.checked);
+  for (const radio of radios) {
+    radio.addEventListener("click", () => {
+      if (radio === current && radio !== all && all) {
+        all.checked = true;
+        current = all;
+      } else {
+        current = radio;
+      }
+    });
+    // Choosing a type opens its records.
+    radio.addEventListener("change", () => {
+      if (!radio.checked || radio === all) return;
+      for (const r of records) {
+        if (types[radio.id]?.includes(r.dataset.type ?? "")) r.querySelector("details")?.setAttribute("open", "");
+      }
+    });
+  }
+
+  // Open all / Close all, kept in sync with records opened by hand.
+  const button = document.querySelector<HTMLButtonElement>("button.open-all");
+  if (button) {
+    const sync = () => {
+      const anyClosed = details().some((d) => !d.open);
+      button.textContent = (anyClosed ? button.dataset.open : button.dataset.close) ?? "";
+    };
+    button.hidden = false;
+    button.addEventListener("click", () => {
+      const open = details().some((d) => !d.open);
+      for (const d of details()) d.open = open;
+      sync();
+    });
+    document.addEventListener("toggle", sync, true);
+    sync();
+  }
+</script>
 
 <style is:inline set:html={filterCss}></style>
 
@@ -119,5 +168,19 @@ const filterCss = guide.rows
   }
   .guide:not(:has(.row input:checked)) .show-all {
     display: none;
+  }
+  .open-all {
+    display: block;
+    min-height: 44px;
+    margin-top: 16px;
+    padding: 0 16px;
+    border: 0;
+    background: var(--panel);
+    color: var(--text);
+    font: 700 16px var(--sans);
+    cursor: pointer;
+  }
+  .open-all:hover {
+    background: var(--surface);
   }
 </style>

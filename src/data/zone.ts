@@ -18,6 +18,8 @@ export const transfer = {
   start: "start transfer",
   download: "Download rangelov.dev.zone",
   file: "/rangelov.dev.zone",
+  size: ";; XFR size: {n} records",
+  failed: ";; transfer failed, download the file instead",
 };
 
 export const footer = {

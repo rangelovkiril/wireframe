@@ -69,3 +69,13 @@ export const guide = {
     },
   ] satisfies GuideRow[],
 };
+
+/** Labels for the live check of each record. */
+export const ui = {
+  verify: "verify",
+  checking: "checking…",
+  signed: "✓ live, signed",
+  live: "✓ live",
+  missing: "not published yet",
+  failed: "lookup failed",
+};
