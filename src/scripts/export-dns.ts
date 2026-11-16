@@ -12,7 +12,7 @@ import { formatRdata } from "../lib/zonefile.ts";
 
 const MIN_TTL = 900; // deSEC minimum_ttl for rangelov.dev
 
-type Published = Rdata & { type: Exclude<Rdata["type"], "URI" | "SOA" | "DNSKEY"> };
+type Published = Rdata & { type: Exclude<Rdata["type"], "URI" | "SOA" | "DNSKEY" | "NS"> };
 interface Out {
   owner: string;
   ttl: number;
@@ -28,7 +28,7 @@ const out: Out[] = allRecords
   .filter((r) => r.managed !== "desec")
   .map((r: RR) => {
     const d = r.rdata;
-    if (d.type === "SOA" || d.type === "DNSKEY") throw new Error(`${r.owner} ${d.type} is deSEC's, mark it managed: "desec"`);
+    if (d.type === "SOA" || d.type === "DNSKEY" || d.type === "NS") throw new Error(`${r.owner} ${d.type} is deSEC's, mark it managed: "desec"`);
     if (d.type === "URI") return { ...r, rdata: { type: "TXT", strings: [d.target] }, uri: formatRdata(d) };
     return { ...r, rdata: d };
   });

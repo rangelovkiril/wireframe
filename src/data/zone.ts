@@ -11,6 +11,15 @@ export const profile = {
     "I mostly do platform engineering, and I care about how the internet works underneath. So I introduce myself through my own DNS zone.",
 };
 
+export const transfer = {
+  title: "Take the whole zone with you",
+  text: "The whole rangelov.dev zone in one file, in the format name servers load. It is generated when the site is built: deSEC does not allow public zone transfers.",
+  command: "$ dig AXFR rangelov.dev @ns1.desec.io",
+  start: "start transfer",
+  download: "Download rangelov.dev.zone",
+  file: "/rangelov.dev.zone",
+};
+
 export const footer = {
   built: "Built with Astro, served by GitHub Pages.",
   dnssec: { label: "DNSSEC by deSEC", href: "https://desec.io" },
@@ -26,7 +35,8 @@ export type RRType =
   | "URI"
   | "CNAME"
   | "TXT"
-  | "MX";
+  | "MX"
+  | "NS";
 
 export type Rdata =
   | { type: "A"; address: string }
@@ -47,7 +57,8 @@ export type Rdata =
   | { type: "URI"; priority: number; weight: number; target: string }
   | { type: "CNAME"; target: string }
   | { type: "TXT"; strings: string[] }
-  | { type: "MX"; preference: number; exchange: string };
+  | { type: "MX"; preference: number; exchange: string }
+  | { type: "NS"; target: string };
 
 /**
  * Who manages the record in the real zone:
@@ -467,6 +478,10 @@ export const sections: Section[] = [
 const infra = (label: string, rdata: Rdata, ttl = DEFAULT_TTL): RR => ({ owner: fqdn(label), ttl, rdata, managed: "infra" });
 const PROTON_DKIM = "domainkey.dkjpwfn5mnmkeczsyz2abjd4idelvbc7qaebbbszhc75nh54k4e5q.domains.proton.ch.";
 export const extraRecords: RR[] = [
+  // deSEC's name servers
+  { owner: ORIGIN, ttl: 900, rdata: { type: "NS", target: "ns1.desec.io." }, managed: "desec" },
+  { owner: ORIGIN, ttl: 900, rdata: { type: "NS", target: "ns2.desec.org." }, managed: "desec" },
+
   // GitHub Pages: this site
   {
     owner: fqdn("portfolio"),

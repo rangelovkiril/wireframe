@@ -6,9 +6,10 @@ import { icons } from "../lib/icons.ts";
 interface Props {
   section: Section;
   open?: boolean;
+  randomart?: string;
 }
 
-const { section, open = false } = Astro.props;
+const { section, open = false, randomart } = Astro.props;
 const [first] = section.records;
 if (!first) throw new Error(`section ${section.id} has no records`);
 const type = first.rdata.type;
@@ -40,7 +41,9 @@ const host = (href: string) => href.replace(/^https?:\/\/(www\.)?/, "").replace(
       </>
     )}
 
-    {c.kind === "randomart" && <slot name="randomart" />}
+    {c.kind === "randomart" && randomart && (
+      <pre class="randomart" role="img" aria-label="Randomart of my DNSSEC key">{randomart}</pre>
+    )}
 
     {c.kind === "skills" && (
       <>
@@ -231,6 +234,12 @@ const host = (href: string) => href.replace(/^https?:\/\/(www\.)?/, "").replace(
     letter-spacing: -0.01em;
     line-height: 1.15;
     margin: 0 0 12px;
+  }
+  .randomart {
+    font-size: clamp(17px, 5vw, 24px);
+    line-height: 1.15;
+    margin: 0;
+    color: var(--t-DNSKEY);
   }
   .prose {
     max-width: 62ch;

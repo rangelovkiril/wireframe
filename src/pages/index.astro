@@ -4,8 +4,14 @@ import "../styles/global.css";
 import Hero from "../components/Hero.astro";
 import Guide from "../components/Guide.astro";
 import Record from "../components/Record.astro";
-import { footer, profile, sections } from "../data/zone.ts";
-import { icons } from "../lib/icons.ts";
+import ZoneTransfer from "../components/ZoneTransfer.astro";
+import { footer, profile } from "../data/zone.ts";
+import { liveSections } from "../lib/live.ts";
+import { dnskeyRandomart } from "../lib/randomart.ts";
+
+const sections = await liveSections();
+const dnskey = sections.flatMap((s) => s.records).find((r) => r.rdata.type === "DNSKEY")?.rdata;
+const randomart = dnskey?.type === "DNSKEY" ? await dnskeyRandomart(dnskey.key) : undefined;
 ---
 
 <!doctype html>
@@ -25,24 +31,16 @@ import { icons } from "../lib/icons.ts";
       <main>
         <Guide />
         <section class="records" aria-label="Records of rangelov.dev">
-          {sections.map((section) => <Record section={section} open={section.group === "soa"} />)}
+          {sections.map((section) => (
+            <Record section={section} open={section.group === "soa"} randomart={randomart} />
+          ))}
         </section>
+        <ZoneTransfer />
       </main>
       <footer class="footer">
         <p>{footer.built}</p>
         <a href={footer.dnssec.href}>
-          <svg
-            viewBox="0 0 24 24"
-            width="20"
-            height="20"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.6"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            aria-hidden="true"
-            set:html={icons.umbrella}
-          />
+          <span class="desec" aria-hidden="true"></span>
           {footer.dnssec.label}
         </a>
       </footer>
@@ -53,6 +51,13 @@ import { icons } from "../lib/icons.ts";
 <style>
   .records {
     border-bottom: 1px solid var(--line);
+  }
+  /* deSEC's own umbrella mark (MIT, see public/logos/desec.svg), in the text colour */
+  .desec {
+    width: 18px;
+    height: 20px;
+    background: currentColor;
+    mask: url("/logos/desec.svg") center / contain no-repeat;
   }
   .footer {
     display: flex;

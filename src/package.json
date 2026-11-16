@@ -7,7 +7,9 @@
     "export-dns": "bun scripts/export-dns.ts",
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "astro preview"
+    "preview": "astro preview",
+    "check-zone": "named-checkzone rangelov.dev dist/rangelov.dev.zone",
+    "test": "bun test"
   },
   "devDependencies": {
     "@types/bun": "latest"
