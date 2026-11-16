@@ -50,6 +50,8 @@ export interface RR {
   ttl: number;
   rdata: Rdata;
   managed: Managed;
+  /** A/AAAA copied from this name's addresses (deSEC has no ALIAS). export-dns checks they still match. */
+  copyOf?: string;
 }
 
 export interface Link {
@@ -92,6 +94,8 @@ export interface Section {
 }
 
 const fqdn = (label: string) => (label === "@" ? ORIGIN : `${label}.${ORIGIN}`);
+
+const VCARD_REPO = "https://codeberg.org/rangelovkiril/contactless-vcard.git";
 
 // ---------------------------------------------------------------------------
 // SRV: what I work with. The weight is my confidence out of 100.
@@ -299,11 +303,12 @@ export const sections: Section[] = [
   {
     id: "card",
     group: "projects",
+    // Codeberg Pages serves this repository at the apex (A/AAAA in extraRecords).
     records: [
       {
-        owner: fqdn("card"),
+        owner: fqdn("_git-pages-repository"),
         ttl: 3600,
-        rdata: { type: "CNAME", target: "codeberg.page." },
+        rdata: { type: "TXT", strings: [VCARD_REPO] },
         managed: "infra", // the card itself, not just this site
       },
     ],
@@ -312,8 +317,8 @@ export const sections: Section[] = [
       title: "NFC business card",
       icon: "nfc-card",
       text:
-        "A JavaCard running an NDEF applet. Tap it with a phone and you land on my contact card, served from Codeberg Pages at card.rangelov.dev.",
-      links: [{ label: "card.rangelov.dev", href: "https://card.rangelov.dev" }],
+        "A JavaCard running an NDEF applet. Tap it with a phone and you land on my contact card, served from Codeberg Pages at rangelov.dev.",
+      links: [{ label: "rangelov.dev", href: "https://rangelov.dev" }],
     },
   },
   {
@@ -449,8 +454,6 @@ export const sections: Section[] = [
 
 const infra = (label: string, rdata: Rdata, ttl = DEFAULT_TTL): RR => ({ owner: fqdn(label), ttl, rdata, managed: "infra" });
 const PROTON_DKIM = "domainkey.dkjpwfn5mnmkeczsyz2abjd4idelvbc7qaebbbszhc75nh54k4e5q.domains.proton.ch.";
-const VCARD_REPO = "https://codeberg.org/rangelovkiril/contactless-vcard.git";
-
 export const extraRecords: RR[] = [
   // GitHub Pages: this site
   {
@@ -468,9 +471,11 @@ export const extraRecords: RR[] = [
   infra("protonmail3._domainkey", { type: "CNAME", target: `protonmail3.${PROTON_DKIM}` }),
   infra("_dmarc", { type: "TXT", strings: ["v=DMARC1; p=quarantine"] }),
 
-  // Codeberg Pages: the NFC card (card CNAME is in the projects above).
-  // The apex has no A/AAAA yet: deSEC has no ALIAS/CNAME flattening.
-  infra("_git-pages-repository", { type: "TXT", strings: [VCARD_REPO] }),
+  // Codeberg Pages at the apex: the NFC card (the _git-pages-repository TXT is
+  // the card project above). deSEC has no ALIAS/CNAME flattening, so the
+  // addresses of codeberg.page are copied here and checked on every export.
+  { ...infra("@", { type: "A", address: "217.197.84.141" }), copyOf: "codeberg.page." },
+  { ...infra("@", { type: "AAAA", address: "2a0a:4580:103f:c0de::2" }), copyOf: "codeberg.page." },
   infra("_git-pages-repository.card", { type: "TXT", strings: [VCARD_REPO] }),
 
   // HedgeDoc

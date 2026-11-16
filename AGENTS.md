@@ -26,7 +26,8 @@ your defaults, this file wins.
 - Hosted on GitHub Pages, deployed by GitHub Actions with the official
   `withastro/action` + `actions/deploy-pages`.
 - Custom domain `portfolio.rangelov.dev` (add `public/CNAME`). The apex
-  `rangelov.dev` is hosted elsewhere; don't touch it.
+  `rangelov.dev` serves the NFC vCard from Codeberg Pages (A/AAAA copied from
+  `codeberg.page`, since deSEC has no ALIAS); don't point it at this site.
 - Package manager: Bun.
 
 ## Project layout
@@ -103,7 +104,7 @@ clears the filter.
 | SRV | Says which server offers a service, with a priority and a weight. | what I work with; the weight is my confidence |
 | CAA | Lists who is allowed to issue certificates for the domain. | certificates I have earned |
 | URI, CNAME | URI points a name at a web address. CNAME makes one name an alias of another. | my projects |
-| TXT | Free-form text attached to a name. | awards, hobbies, plans, and one project |
+| TXT | Free-form text attached to a name. | awards, hobbies, plans, and two projects |
 | MX | Where email for the domain should be delivered. | how to reach me |
 
 ## Records (`src/data/zone.ts`)
@@ -123,7 +124,7 @@ no boxes. Owner names are lowercase (as in DNS); record types are uppercase.
 | rampme.rangelov.dev. | 3600 | URI | `10 1 "https://github.com/rangelovkiril/rampme-software"` |
 | atlas.rangelov.dev. | 3600 | URI | `10 1 "https://codeberg.org/rangelovkiril/ripe-atlas-ports"` |
 | lms.rangelov.dev. | 3600 | URI | `10 1 "https://github.com/rangelovkiril/lms-controller"` |
-| card.rangelov.dev. | 3600 | CNAME | `codeberg.page.` |
+| _git-pages-repository.rangelov.dev. | 3600 | TXT | `"https://codeberg.org/rangelovkiril/contactless-vcard.git"` |
 | tues-web.rangelov.dev. | 3600 | URI | `10 1 "https://codeberg.org/rangelovkiril/tues-website-infra"` |
 | miget.rangelov.dev. | 3600 | TXT | `"drone detection prototype, EDTH Sofia 2026"` |
 | _awards.rangelov.dev. | 86400 | TXT | `"3rd place, TUES Fest"` |
@@ -169,7 +170,7 @@ BGP 50 · Elixir 40 · Java 35
 - **RampMe** (icon: bus with ramp): Real-time accessibility for Sofia public transport, with wheelchair-ramp requests sent to the vehicle. Award: 3rd place at TUES Fest, showcased at Robotics Strategy Forum 2026. Link: Code on GitHub
 - **RIPE Atlas probe** (icon: probe with antenna): Probe 1018643 on a Raspberry Pi 2, and unofficial signed armhf builds of the software probe. Link: ripe-atlas-ports on Codeberg
 - **LMS** (icon: satellite + laser): A distributed satellite laser ranging mini-station with a real-time 3D view. Award: TUES Fest, national IT olympiad. Link: Code on GitHub
-- **NFC business card** (icon: card with NFC waves): A JavaCard running an NDEF applet. Tap it with a phone and you land on my contact card, served from Codeberg Pages at card.rangelov.dev. Link: card.rangelov.dev
+- **NFC business card** (icon: card with NFC waves): A JavaCard running an NDEF applet. Tap it with a phone and you land on my contact card, served from Codeberg Pages at rangelov.dev. Link: rangelov.dev
 - **TUES website infrastructure** (icon: globe): Infrastructure for a new school website: Terraform on Azure Container Apps with OIDC deploys, plus a scraper that moved about 1,830 records from the old site into Directus. Paused while the school decides what it wants. Link: Infra on Codeberg
 - **Project M.I.G.E.T.** (icon: drone): Drone detection prototype from EDTH Sofia 2026. My role was DevOps.
 

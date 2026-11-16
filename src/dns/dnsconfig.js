@@ -13,8 +13,8 @@ D("rangelov.dev", REG_NONE,
 	DnsProvider(DSP_DESEC),
 	DefaultTTL(3600),
 
-	// card.rangelov.dev. CNAME
-	CNAME("card", "codeberg.page."),
+	// _git-pages-repository.rangelov.dev. TXT
+	TXT("_git-pages-repository", "https://codeberg.org/rangelovkiril/contactless-vcard.git"),
 	// rangelov.dev. MX
 	MX("@", 10, "mail.protonmail.ch."),
 	MX("@", 20, "mailsec.protonmail.ch."),
@@ -29,8 +29,10 @@ D("rangelov.dev", REG_NONE,
 	CNAME("protonmail3._domainkey", "protonmail3.domainkey.dkjpwfn5mnmkeczsyz2abjd4idelvbc7qaebbbszhc75nh54k4e5q.domains.proton.ch."),
 	// _dmarc.rangelov.dev. TXT
 	TXT("_dmarc", "v=DMARC1; p=quarantine"),
-	// _git-pages-repository.rangelov.dev. TXT
-	TXT("_git-pages-repository", "https://codeberg.org/rangelovkiril/contactless-vcard.git"),
+	// rangelov.dev. A, copy of codeberg.page. (no ALIAS at deSEC)
+	A("@", "217.197.84.141"),
+	// rangelov.dev. AAAA, copy of codeberg.page. (no ALIAS at deSEC)
+	AAAA("@", "2a0a:4580:103f:c0de::2"),
 	// _git-pages-repository.card.rangelov.dev. TXT
 	TXT("_git-pages-repository.card", "https://codeberg.org/rangelovkiril/contactless-vcard.git"),
 	// hedgedoc.rangelov.dev. A

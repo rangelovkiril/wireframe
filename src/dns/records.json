@@ -70,11 +70,11 @@
     ]
   },
   {
-    "subname": "card",
-    "type": "CNAME",
+    "subname": "_git-pages-repository",
+    "type": "TXT",
     "ttl": 3600,
     "records": [
-      "codeberg.page."
+      "\"https://codeberg.org/rangelovkiril/contactless-vcard.git\""
     ]
   },
   {
@@ -176,11 +176,19 @@
     ]
   },
   {
-    "subname": "_git-pages-repository",
-    "type": "TXT",
+    "subname": "",
+    "type": "A",
     "ttl": 3600,
     "records": [
-      "\"https://codeberg.org/rangelovkiril/contactless-vcard.git\""
+      "217.197.84.141"
+    ]
+  },
+  {
+    "subname": "",
+    "type": "AAAA",
+    "ttl": 3600,
+    "records": [
+      "2a0a:4580:103f:c0de::2"
     ]
   },
   {

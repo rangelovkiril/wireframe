@@ -7,6 +7,7 @@
 // This script never talks to deSEC or runs dnscontrol.
 
 import { allRecords, DEFAULT_TTL, ORIGIN, type Managed, type Rdata, type RR } from "../data/zone.ts";
+import { lookup } from "../lib/doh.ts";
 import { formatRdata } from "../lib/zonefile.ts";
 
 const MIN_TTL = 900; // deSEC minimum_ttl for rangelov.dev
@@ -18,6 +19,7 @@ interface Out {
   managed: Managed;
   rdata: Published;
   uri?: string; // original URI rdata, when published as TXT
+  copyOf?: string;
 }
 
 // dnscontrol has no URI record type, so a URI is published as a TXT record
@@ -64,6 +66,27 @@ for (const c of out.filter((r) => r.rdata.type === "CNAME")) {
   if (out.some((r) => r !== c && r.owner === c.owner)) errors.push(`${c.owner}: CNAME next to other records`);
 }
 
+// Flattened A/AAAA must still match the name they copy.
+const copies = new Map<string, { name: string; type: "A" | "AAAA"; have: string[] }>();
+for (const r of out) {
+  const d = r.rdata;
+  if (!r.copyOf || (d.type !== "A" && d.type !== "AAAA")) continue;
+  const key = `${r.owner} ${d.type} ${r.copyOf}`;
+  const c = copies.get(key) ?? { name: r.copyOf, type: d.type, have: [] };
+  c.have.push(d.address.toLowerCase());
+  copies.set(key, c);
+}
+for (const [key, c] of copies) {
+  try {
+    const live = (await lookup(c.name, c.type)).map((a) => a.toLowerCase()).sort();
+    if (live.join() !== c.have.sort().join()) {
+      errors.push(`${key}: ${c.name} now has ${c.type} ${live.join(", ") || "(none)"}; update data/zone.ts`);
+    }
+  } catch (e) {
+    console.warn(`warning: could not check ${key} (${(e as Error).message})`);
+  }
+}
+
 if (errors.length) {
   console.error(errors.join("\n"));
   process.exit(1);
@@ -100,7 +123,10 @@ function block(records: Out[]): string[] {
   let last = "";
   for (const r of records) {
     const key = rrset(r);
-    if (key !== last) lines.push(`\t// ${r.owner} ${r.uri ? `URI ${r.uri}` : r.rdata.type}`);
+    if (key !== last) {
+      const what = r.uri ? `URI ${r.uri}` : r.copyOf ? `${r.rdata.type}, copy of ${r.copyOf} (no ALIAS at deSEC)` : r.rdata.type;
+      lines.push(`\t// ${r.owner} ${what}`);
+    }
     last = key;
     lines.push(`\t${dnscontrol(r)},`);
   }
