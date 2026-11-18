@@ -14,7 +14,7 @@ export interface GuideRow {
 export const guide = {
   heading: "What the records mean",
   intro: "Each section below is a DNS record of rangelov.dev. Tap a record to open it, or tap a type to see only those.",
-  verifyNote: "The verify button next to a record asks a public DNS resolver whether that record is really published, and signed with DNSSEC.",
+  verifyNote: "The verify button next to a record asks Quad9, a non-profit public DNS resolver, whether that record is really published and signed with DNSSEC.",
   showAll: "Show all records",
   openAll: "Open all records",
   closeAll: "Close all records",
@@ -32,13 +32,6 @@ export const guide = {
       label: "DNSKEY",
       means: "The zone's public key. Resolvers use it to check that answers were not tampered with (DNSSEC).",
       here: "my picture, drawn from the key",
-    },
-    {
-      id: "srv",
-      types: ["SRV"],
-      label: "SRV",
-      means: "Says which server offers a service, with a priority and a weight.",
-      here: "what I work with; the weight is my confidence",
     },
     {
       id: "caa",
@@ -85,7 +78,7 @@ export const ui = {
     missing: "A public resolver has no record of this type for this name, so it is not published yet.",
     failed: "The lookup did not finish. Try again, or ask DNS yourself:",
   },
-  answer: "What dns.google answered",
+  answer: "What {server} answered",
   matches: "Same as the record on this page.",
   differs: "Not the same as the record on this page.",
   soaNote: "Compared by name: the serial grows with every change to the zone.",

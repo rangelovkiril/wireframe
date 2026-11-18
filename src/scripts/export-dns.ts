@@ -7,7 +7,7 @@
 // This script never talks to deSEC or runs dnscontrol.
 
 import { allRecords, DEFAULT_TTL, ORIGIN, type Managed, type Rdata, type RR } from "../data/zone.ts";
-import { lookup } from "../lib/doh.ts";
+import { $ } from "bun";
 import { formatRdata } from "../lib/zonefile.ts";
 
 const MIN_TTL = 900; // deSEC minimum_ttl for rangelov.dev
@@ -48,6 +48,8 @@ for (const r of out) {
   if (!r.owner.endsWith(ORIGIN)) errors.push(`${where}: owner outside ${ORIGIN}`);
   if (r.ttl < MIN_TTL) errors.push(`${where}: TTL ${r.ttl} is below deSEC's minimum of ${MIN_TTL}`);
   if (d.type === "TXT") for (const s of d.strings) if (bytes(s) > 255) errors.push(`${where}: TXT string over 255 bytes`);
+  // dnscontrol joins the strings of a TXT record into one, so the page would not match DNS
+  if (d.type === "TXT" && d.strings.length > 1) errors.push(`${where}: use one string per TXT record (dnscontrol joins them)`);
   if ((d.type === "CNAME" || d.type === "SRV") && !d.target.endsWith(".")) errors.push(`${where}: target must be absolute`);
   if (d.type === "MX" && !d.exchange.endsWith(".")) errors.push(`${where}: exchange must be absolute`);
 
@@ -78,7 +80,9 @@ for (const r of out) {
 }
 for (const [key, c] of copies) {
   try {
-    const live = (await lookup(c.name, c.type)).map((a) => a.toLowerCase()).sort();
+    // dig rather than DoH: Quad9 only speaks DoH over HTTP/2, which Bun's fetch does not
+    const out = await $`dig +short ${c.type} ${c.name} @9.9.9.9`.text();
+    const live = out.split("\n").map((a) => a.trim().toLowerCase()).filter((a) => a && !a.endsWith(".")).sort();
     if (live.join() !== c.have.sort().join()) {
       errors.push(`${key}: ${c.name} now has ${c.type} ${live.join(", ") || "(none)"}; update data/zone.ts`);
     }

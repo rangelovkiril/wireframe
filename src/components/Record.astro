@@ -56,22 +56,6 @@ const host = (href: string) => href.replace(/^https?:\/\/(www\.)?/, "").replace(
       <pre class="randomart" role="img" aria-label="Randomart of my DNSSEC key">{randomart}</pre>
     )}
 
-    {c.kind === "skills" && (
-      <>
-        <h2>{c.title}</h2>
-        <p class="note">{c.note}</p>
-        <ul class="skills">
-          {c.items.map((s) => (
-            <li>
-              <span class="label">{s.label}</span>
-              <span class="weight">{s.weight}</span>
-              <span class="bar" style={`--w: ${s.weight}%`} aria-hidden="true" />
-            </li>
-          ))}
-        </ul>
-      </>
-    )}
-
     {c.kind === "certs" && (
       <>
         <h2>{c.title}</h2>
@@ -326,43 +310,11 @@ const host = (href: string) => href.replace(/^https?:\/\/(www\.)?/, "").replace(
   .prose {
     max-width: 62ch;
   }
-  .note {
-    color: var(--muted);
-    margin: 0 0 16px;
-  }
 
   ul {
     list-style: none;
     padding: 0;
     margin: 0;
-  }
-
-  .skills {
-    display: grid;
-    gap: 12px;
-    max-width: 520px;
-  }
-  .skills li {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 4px 12px;
-  }
-  .weight {
-    font-family: var(--mono);
-    font-weight: 700;
-    color: var(--c);
-  }
-  .bar {
-    grid-column: 1 / -1;
-    height: 4px;
-    background: var(--surface);
-  }
-  .bar::before {
-    content: "";
-    display: block;
-    height: 100%;
-    width: var(--w);
-    background: var(--c);
   }
 
   .certs {

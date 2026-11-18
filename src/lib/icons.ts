@@ -17,5 +17,4 @@ export const icons: Record<IconName | "mail", string> = {
   // contactless card with NFC waves
   "nfc-card": '<rect x="2" y="6" width="13" height="12" rx="1.5"/><rect x="5" y="9.5" width="4" height="3"/><path d="M18 9.5a3.5 3.5 0 0 1 0 5M20.5 7.5a6.5 6.5 0 0 1 0 9"/>',
   globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a13.5 13.5 0 0 1 0 18M12 3a13.5 13.5 0 0 0 0 18M4.5 7.5h15M4.5 16.5h15"/>',
-  drone: '<rect x="9" y="10" width="6" height="4" rx="1"/><path d="M9 10.5 6 7.5M15 10.5l3-3M9 13.5l-3 3M15 13.5l3 3"/><path d="M3 7.5h6M15 7.5h6M3 16.5h6M15 16.5h6"/>',
 };

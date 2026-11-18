@@ -1,23 +1,5 @@
 [
   {
-    "subname": "_skills._tcp",
-    "type": "SRV",
-    "ttl": 3600,
-    "records": [
-      "1 80 443 rangelov.dev.",
-      "2 80 443 rangelov.dev.",
-      "3 75 443 rangelov.dev.",
-      "4 70 443 rangelov.dev.",
-      "5 70 443 rangelov.dev.",
-      "6 70 443 rangelov.dev.",
-      "7 60 443 rangelov.dev.",
-      "8 55 443 rangelov.dev.",
-      "9 50 443 rangelov.dev.",
-      "10 40 443 rangelov.dev.",
-      "11 35 443 rangelov.dev."
-    ]
-  },
-  {
     "subname": "_certs",
     "type": "CAA",
     "ttl": 86400,
@@ -91,14 +73,6 @@
     ]
   },
   {
-    "subname": "miget",
-    "type": "CNAME",
-    "ttl": 3600,
-    "records": [
-      "github.com."
-    ]
-  },
-  {
     "subname": "_awards",
     "type": "TXT",
     "ttl": 86400,
@@ -111,7 +85,7 @@
     "type": "TXT",
     "ttl": 3600,
     "records": [
-      "\"trains\" \"coffee\" \"languages\" \"music\""
+      "\"trains, coffee, languages, music\""
     ]
   },
   {
@@ -119,7 +93,7 @@
     "type": "TXT",
     "ttl": 900,
     "records": [
-      "\"gap-year\" \"own-asn\" \"kcna\" \"fellowship\""
+      "\"gap-year, own-asn, kcna\""
     ]
   },
   {

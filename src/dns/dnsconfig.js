@@ -43,18 +43,6 @@ D("rangelov.dev", REG_NONE,
 	CAA("hedgedoc", "issuewild", ";"),
 
 	// === portfolio.rangelov.dev: delete from here to END when the site is archived ===
-	// _skills._tcp.rangelov.dev. SRV
-	SRV("_skills._tcp", 1, 80, 443, "rangelov.dev."),
-	SRV("_skills._tcp", 2, 80, 443, "rangelov.dev."),
-	SRV("_skills._tcp", 3, 75, 443, "rangelov.dev."),
-	SRV("_skills._tcp", 4, 70, 443, "rangelov.dev."),
-	SRV("_skills._tcp", 5, 70, 443, "rangelov.dev."),
-	SRV("_skills._tcp", 6, 70, 443, "rangelov.dev."),
-	SRV("_skills._tcp", 7, 60, 443, "rangelov.dev."),
-	SRV("_skills._tcp", 8, 55, 443, "rangelov.dev."),
-	SRV("_skills._tcp", 9, 50, 443, "rangelov.dev."),
-	SRV("_skills._tcp", 10, 40, 443, "rangelov.dev."),
-	SRV("_skills._tcp", 11, 35, 443, "rangelov.dev."),
 	// _certs.rangelov.dev. CAA
 	CAA("_certs", "issue", "ripe.net", TTL(86400)),
 	CAA("_certs", "issue", "netacad.com", TTL(86400)),
@@ -72,14 +60,12 @@ D("rangelov.dev", REG_NONE,
 	CNAME("lms", "github.com."),
 	// tues-web.rangelov.dev. CNAME
 	CNAME("tues-web", "elsys.website."),
-	// miget.rangelov.dev. CNAME
-	CNAME("miget", "github.com."),
 	// _awards.rangelov.dev. TXT
 	TXT("_awards", "3rd place, TUES Fest", TTL(86400)),
 	// _hobbies.rangelov.dev. TXT
-	TXT("_hobbies", ["trains","coffee","languages","music"]),
+	TXT("_hobbies", "trains, coffee, languages, music"),
 	// _plans.rangelov.dev. TXT
-	TXT("_plans", ["gap-year","own-asn","kcna","fellowship"], TTL(900)),
+	TXT("_plans", "gap-year, own-asn, kcna", TTL(900)),
 	// portfolio.rangelov.dev. CNAME
 	CNAME("portfolio", "rangelovkiril.github.io."),
 END);

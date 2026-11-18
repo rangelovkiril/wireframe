@@ -96,7 +96,6 @@ export interface Link {
 export type Content =
   | { kind: "prose"; title: string; text: string }
   | { kind: "randomart" }
-  | { kind: "skills"; title: string; note: string; items: { label: string; weight: number }[] }
   | {
       kind: "certs";
       title: string;
@@ -117,9 +116,9 @@ export type Content =
   | { kind: "list"; title: string; items: string[] }
   | { kind: "contact"; title: string; email: string; links: Link[] };
 
-export type IconName = "ramp-bus" | "probe" | "package" | "satellite" | "nfc-card" | "globe" | "drone";
+export type IconName = "ramp-bus" | "probe" | "package" | "satellite" | "nfc-card" | "globe";
 
-export type SectionGroup = "soa" | "dnskey" | "srv" | "caa" | "projects" | "awards" | "hobbies" | "plans" | "mx";
+export type SectionGroup = "soa" | "dnskey" | "caa" | "projects" | "awards" | "hobbies" | "plans" | "mx";
 
 export interface Section {
   id: string; // HTML id / anchor
@@ -132,26 +131,6 @@ export interface Section {
 const fqdn = (label: string) => (label === "@" ? ORIGIN : `${label}.${ORIGIN}`);
 
 const VCARD_REPO = "https://codeberg.org/rangelovkiril/contactless-vcard.git";
-
-// ---------------------------------------------------------------------------
-// SRV: what I work with. The weight is my confidence out of 100.
-
-// Every record points at rangelov.dev. itself: I am the one offering these.
-// The priority is the skill's place in the list, which also keeps the records
-// distinct; the skill's name is a comment in the zone file.
-const skills: { label: string; weight: number }[] = [
-  { label: "Linux", weight: 80 },
-  { label: "Containers, Podman", weight: 80 },
-  { label: "GitHub and Forgejo Actions", weight: 75 },
-  { label: "Kubernetes", weight: 70 },
-  { label: "Flux, GitOps", weight: 70 },
-  { label: "DNS", weight: 70 },
-  { label: "OpenTofu", weight: 60 },
-  { label: "TypeScript, Bun", weight: 55 },
-  { label: "BGP", weight: 50 },
-  { label: "Elixir", weight: 40 },
-  { label: "Java", weight: 35 },
-];
 
 // ---------------------------------------------------------------------------
 // CAA: one record per issuer (the issuing organisation's domain), the
@@ -234,23 +213,6 @@ export const sections: Section[] = [
       },
     ],
     content: { kind: "randomart" },
-  },
-  {
-    id: "srv",
-    group: "srv",
-    records: skills.map((s, i) => ({
-      owner: fqdn("_skills._tcp"),
-      ttl: 3600,
-      rdata: { type: "SRV", priority: i + 1, weight: s.weight, port: 443, target: ORIGIN },
-      managed: "portfolio",
-      comment: s.label,
-    })),
-    content: {
-      kind: "skills",
-      title: "What I work with",
-      note: "The SRV weight is my own confidence, out of 100.",
-      items: skills.map(({ label, weight }) => ({ label, weight })),
-    },
   },
   {
     id: "caa",
@@ -388,22 +350,6 @@ export const sections: Section[] = [
       ],
     },
   },
-  {
-    id: "miget",
-    group: "projects",
-    records: [cname("miget", "github.com.")],
-    content: {
-      kind: "project",
-      title: "Project M.I.G.E.T.",
-      icon: "drone",
-      text: "Drone detection prototype from EDTH Sofia 2026. My role was DevOps.",
-      links: [
-        { label: "Code on GitHub", href: "https://github.com/rangelovkiril/EDTH" },
-        { label: "Infra on GitHub", href: "https://github.com/rangelovkiril/EDTH-infra" },
-      ],
-    },
-  },
-
   // --- TXT ----------------------------------------------------------------
   {
     id: "awards",
@@ -435,7 +381,7 @@ export const sections: Section[] = [
       {
         owner: fqdn("_hobbies"),
         ttl: 3600,
-        rdata: { type: "TXT", strings: ["trains", "coffee", "languages", "music"] },
+        rdata: { type: "TXT", strings: ["trains, coffee, languages, music"] },
         managed: "portfolio",
       },
     ],
@@ -458,7 +404,7 @@ export const sections: Section[] = [
       {
         owner: fqdn("_plans"),
         ttl: 900,
-        rdata: { type: "TXT", strings: ["gap-year", "own-asn", "kcna", "fellowship"] },
+        rdata: { type: "TXT", strings: ["gap-year, own-asn, kcna"] },
         managed: "portfolio",
       },
     ],
@@ -470,7 +416,6 @@ export const sections: Section[] = [
         "My own ASN and IPv6 space over BGP, after the thesis",
         "A small home server",
         "KCNA",
-        "RIPE NCC Fellowship",
       ],
     },
   },

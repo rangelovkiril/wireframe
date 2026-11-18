@@ -16,11 +16,10 @@ import { ui } from "../data/guide.ts";
   <p class="match" hidden></p>
   <h3>{ui.yourself}</h3>
   <pre class="dig"></pre>
-  <p class="doh"><a target="_blank" rel="noopener">dns.google</a></p>
 </dialog>
 
 <script>
-  import { check, type QueryType } from "../lib/doh.ts";
+  import { check, RESOLVERS, type QueryType } from "../lib/doh.ts";
   import { ui } from "../data/guide.ts";
 
   const dialog = document.querySelector<HTMLDialogElement>("dialog.verify-dialog")!;
@@ -32,7 +31,6 @@ import { ui } from "../data/guide.ts";
   const answer = $<HTMLPreElement>(".answer");
   const match = $(".match");
   const dig = $<HTMLPreElement>(".dig");
-  const doh = $<HTMLAnchorElement>(".doh a");
 
   // Close when the backdrop is clicked.
   dialog.addEventListener("click", (e) => {
@@ -50,8 +48,7 @@ import { ui } from "../data/guide.ts";
       verdict.className = "verdict";
       explain.textContent = "";
       answerTitle.hidden = answer.hidden = match.hidden = true;
-      dig.textContent = `$ dig +dnssec ${type} ${name}`;
-      doh.href = `https://dns.google/resolve?name=${encodeURIComponent(name)}&type=${type}&do=1`;
+      dig.textContent = `$ dig +dnssec ${type} ${name} @${RESOLVERS[0].ip}`;
       dialog.showModal();
 
       let c: Awaited<ReturnType<typeof check>> | undefined;
@@ -66,6 +63,7 @@ import { ui } from "../data/guide.ts";
       verdict.classList.toggle("ok", ok);
       explain.textContent = c ? ui.explain[c.verdict] : ui.explain.failed;
       if (c?.lines.length) {
+        answerTitle.textContent = ui.answer.replace("{server}", c.server);
         answer.textContent = c.lines.join("\n");
         answerTitle.hidden = answer.hidden = false;
       }
@@ -150,15 +148,5 @@ import { ui } from "../data/guide.ts";
   .match {
     margin: 12px 0 0;
     font-weight: 700;
-  }
-  .doh {
-    margin: 8px 0 0;
-  }
-  .doh a {
-    display: inline-flex;
-    align-items: center;
-    min-height: 44px;
-    font-family: var(--mono);
-    font-size: 14px;
   }
 </style>

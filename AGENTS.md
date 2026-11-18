@@ -70,7 +70,8 @@ The records on the page are published for real in the `rangelov.dev` zone
   dnscontrol config `dns/dnsconfig.js` (one file; portfolio records in one
   block at the end, deleted when the site is archived) and `dns/records.json`.
 - SOA and DNSKEY are managed by deSEC; they are only displayed, never exported.
-- TXT strings must stay under 255 bytes each. Minimum TTL is 900 (deSEC).
+- TXT strings must stay under 255 bytes each, one string per TXT record
+  (dnscontrol joins multiple strings into one). Minimum TTL is 900 (deSEC).
 - No URI records (dnscontrol has no URI type, and they add little): projects
   are CNAMEs to the host their source or site lives on.
 - Never run `dnscontrol push` or call the deSEC API. Kiril reviews
@@ -80,7 +81,7 @@ The records on the page are published for real in the `rangelov.dev` zone
 
 1. Hero
 2. "What the records mean" guide (also the filter)
-3. Records: `SOA` → `DNSKEY` → `SRV` → `CAA` → projects (`CNAME`/`TXT`) → `TXT` awards → `TXT` hobbies → `TXT` plans → `MX`
+3. Records: `SOA` → `DNSKEY` → `CAA` → projects (`CNAME`/`TXT`) → `TXT` awards → `TXT` hobbies → `TXT` plans → `MX`
 4. Zone transfer panel (download the zone file)
 5. Footer
 
@@ -106,7 +107,6 @@ clears the filter.
 |---|---|---|
 | SOA | Start of Authority. The first record of every zone: who is responsible for it. | who I am |
 | DNSKEY | The zone's public key. Resolvers use it to check that answers were not tampered with (DNSSEC). | my picture, drawn from the key |
-| SRV | Says which server offers a service, with a priority and a weight. | what I work with; the weight is my confidence |
 | CAA | Lists who is allowed to issue certificates for the domain. | certificates I have earned |
 | CNAME | Makes one name an alias of another name. | my projects |
 | TXT | Free-form text attached to a name. | awards, hobbies, plans, and the NFC card |
@@ -122,7 +122,6 @@ no boxes. Owner names are lowercase (as in DNS); record types are uppercase.
 |---|---|---|---|
 | rangelov.dev. | 300 | SOA | `get.desec.io. get.desec.io. 2026113469` (as published; timers only in the zone file) |
 | rangelov.dev. | 3600 | DNSKEY | `257 3 13 ( … )` |
-| _skills._tcp.rangelov.dev. | 3600 | SRV | `1 80 443 rangelov.dev.` (first of 11: priority = place in the list, weight = confidence, target = me; skill name as a zone-file comment) |
 | _certs.rangelov.dev. | 86400 | CAA | `0 issue "ripe.net"` (and `0 issue "netacad.com"`: one record per issuer) |
 | protolith.rangelov.dev. | 3600 | CNAME | `codeberg.org.` (protolith.dev exists but is empty for now) |
 | devops.rangelov.dev. | 3600 | CNAME | `devops.elsys.club.` |
@@ -132,10 +131,9 @@ no boxes. Owner names are lowercase (as in DNS); record types are uppercase.
 | lms.rangelov.dev. | 3600 | CNAME | `github.com.` |
 | _git-pages-repository.rangelov.dev. | 3600 | TXT | `"https://codeberg.org/rangelovkiril/contactless-vcard.git"` |
 | tues-web.rangelov.dev. | 3600 | CNAME | `elsys.website.` |
-| miget.rangelov.dev. | 3600 | CNAME | `github.com.` |
 | _awards.rangelov.dev. | 86400 | TXT | `"3rd place, TUES Fest"` |
-| _hobbies.rangelov.dev. | 3600 | TXT | `"trains" "coffee" "languages" "music"` |
-| _plans.rangelov.dev. | 900 | TXT | `"gap-year" "own-asn" "kcna" "fellowship"` |
+| _hobbies.rangelov.dev. | 3600 | TXT | `"trains, coffee, languages, music"` |
+| _plans.rangelov.dev. | 900 | TXT | `"gap-year, own-asn, kcna"` |
 | rangelov.dev. | 3600 | MX | `10 mail.protonmail.ch.` (and `20 mailsec.protonmail.ch.`) |
 
 The certificate records live at `_certs`, never at the apex: CAA is checked by
@@ -159,10 +157,8 @@ deep into DNS, IPv6 and BGP, and I run the school's DevOps club.
 
 **DNSKEY:** only the randomart. No heading, caption, label or box.
 
-**SRV, "What I work with":** note `The SRV weight is my own confidence, out of 100.`
-Linux 80 · Containers, Podman 80 · GitHub and Forgejo Actions 75 ·
-Kubernetes 70 · Flux, GitOps 70 · DNS 70 · OpenTofu 60 · TypeScript, Bun 55 ·
-BGP 50 · Elixir 40 · Java 35
+No skills section and no SRV records: numeric self-ratings read badly to a
+reviewer (this portfolio is used for the RIPE NCC Fellowship application).
 
 **CAA, "Certified by":**
 - RIPE NCC: LIR Fundamentals, Aug 2026, issuer `ripe.net`
@@ -184,7 +180,6 @@ Cisco entry is text only.
 - **Light My Satellite (LMS)** (logo `assets/logos/lms.png`): A distributed satellite laser ranging mini-station with a real-time 3D view. Award: TUES Fest, national IT olympiad. Link: Code on GitHub
 - **NFC business card** (icon: card with NFC waves): A JavaCard running an NDEF applet. Tap it with a phone and you land on my contact card, served from Codeberg Pages at rangelov.dev. Link: rangelov.dev
 - **TUES website infrastructure** (icon: globe): A proposal, not an official school project: infrastructure for a new school website. It started as a k3s cluster and moved to Terraform on Azure Container Apps with OIDC deploys, plus a scraper that moved about 1,830 records from the old site into Directus. Paused while the school decides what it wants. Links: k3s setup on Codeberg, Azure setup on GitHub
-- **Project M.I.G.E.T.** (icon: drone): Drone detection prototype from EDTH Sofia 2026. My role was DevOps. Links: Code on GitHub (rangelovkiril/EDTH), Infra on GitHub (rangelovkiril/EDTH-infra). The project is not listed publicly by EDTH.
 
 Icons: simple 24×24 inline stroke SVGs (currentColor, stroke 1.6).
 
@@ -208,8 +203,8 @@ Languages: Bulgarian, English, Russian; learning Arabic and French · Music from
 Bach to Balkan pop-folk
 
 **TXT _plans, "Next":** A gap year to explore before specialising · My own ASN
-and IPv6 space over BGP, after the thesis · A small home server · KCNA ·
-RIPE NCC Fellowship
+and IPv6 space over BGP, after the thesis · A small home server · KCNA
+(do not list the RIPE NCC Fellowship here)
 
 **MX, "Get in touch":** big `contact@rangelov.dev` mailto, then links:
 Codeberg (codeberg.org/rangelovkiril), GitHub (github.com/rangelovkiril),
@@ -224,7 +219,7 @@ Light (default):
 --bg      #FFFFFF   --panel   #F4F4F2   --surface #E8E8E4
 --text    #1D1D1B   --muted   #5C5C57   --line    #E0E0DA
 --accent  #1F5FBF   --ok      #2B7A35
-type colours: SOA #C2570C  DNSKEY #7A4A1E  SRV #2B7A35  CAA #2B7A35
+type colours: SOA #C2570C  DNSKEY #7A4A1E  CAA #2B7A35
               URI #1F5FBF  CNAME #1F5FBF  TXT #C2570C  MX #7A4A1E
 ```
 Dark, via `prefers-color-scheme: dark` only (no toggle):
@@ -279,8 +274,7 @@ everything is still visible and readable.
    with a one-line plain explanation, the command
    `$ dig AXFR rangelov.dev @ns1.desec.io`, and a `start transfer` button.
    - At build time, `lib/zonefile.ts` renders `zone.ts` as a valid BIND zone
-     file (`$ORIGIN`, `$TTL`, one line per record: 11 SRV lines, 5 CAA lines,
-     multi-string TXT records), served at `/rangelov.dev.zone`.
+     file (`$ORIGIN`, `$TTL`, one line per record), served at `/rangelov.dev.zone`.
    - On click, fetch that file and stream its lines into a `<pre>` (~60 ms
      per line), then show `;; XFR size: N records` and a
      `Download rangelov.dev.zone` link (`download` attribute).
@@ -288,12 +282,14 @@ everything is still visible and readable.
    - Without JS, the panel is just a plain link to `/rangelov.dev.zone`.
    - deSEC doesn't allow public AXFR; the file is generated, and the panel
      shouldn't claim it came from a live transfer.
-3. **Live verify.** A small `verify` button per record. Query
-   `https://dns.google/resolve?name=<fqdn>&type=<TYPE>&do=1` (JSON, CORS
-   allowed). Show `✓ live, signed` if it resolves with `"AD": true`,
-   `✓ live` without AD, `not published yet` otherwise. The result opens in a
+3. **Live verify.** A small `verify` button per record. `lib/doh.ts` asks
+   Quad9 (`https://dns.quad9.net/dns-query`), then DNS4EU if Quad9 fails, in
+   DNS wire format (RFC 8484, GET `?dns=`, DO bit set; both allow CORS). No
+   Google: the site is about European infrastructure. Show `✓ live, signed`
+   if it resolves with the AD flag, `✓ live` without AD, `not published yet`
+   otherwise. The result opens in a
    `<dialog>` (`components/VerifyDialog.astro`): the verdict with a plain
-   explanation, the raw answer from dns.google including the RRSIG, whether it
+   explanation, the raw answer from the resolver including the RRSIG, whether it
    matches the record on the page (TXT compared with its strings joined, SOA by
    its names only), and the `dig +dnssec` command to check it yourself. The
    result is shown only in the dialog, not under the record. The guide has one
