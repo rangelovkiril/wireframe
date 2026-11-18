@@ -27,8 +27,12 @@ your defaults, this file wins.
   `withastro/action` + `actions/deploy-pages`. A `check` job (bun check,
   bun test, build, named-checkzone) runs first; the workflow also runs daily
   so the SOA serial and DNSKEY fetched at build time stay current.
-- `layouts/Base.astro` holds the shared `<head>`: favicon (`public/favicon.svg`,
-  the root zone's dot), Open Graph tags and `public/og.png` (1200×630).
+- `layouts/Base.astro` holds the shared `<head>`: favicons, Open Graph tags and
+  `public/og.png` (1200×630). The icon is "k." (k from Hanken Grotesk 900, dot
+  in the type orange): `favicon.svg` switches light/dark itself through
+  `prefers-color-scheme`; `favicon.ico` (16/32/48, light) for browsers without
+  SVG favicons; `apple-touch-icon.png` (180, full bleed); `site.webmanifest`
+  with 192/512 and a maskable 512 for Android.
   `pages/404.astro` is an NXDOMAIN page.
 - Custom domain `portfolio.rangelov.dev` (add `public/CNAME`). The apex
   `rangelov.dev` serves the NFC vCard from Codeberg Pages (A/AAAA copied from

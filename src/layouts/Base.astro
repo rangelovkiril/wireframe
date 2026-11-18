@@ -18,7 +18,13 @@ const image = new URL("/og.png", Astro.site);
     <title>{title}</title>
     <meta name="description" content={profile.tagline} />
     <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
+    <!-- favicon.svg follows the colour scheme; .ico for everything that can't do SVG -->
+    <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#121211" media="(prefers-color-scheme: dark)" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={profile.tagline} />
