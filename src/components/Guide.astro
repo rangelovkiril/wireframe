@@ -13,7 +13,6 @@ const filterCss = guide.rows
 <section class="guide" aria-labelledby="guide-heading">
   <h2 id="guide-heading">{guide.heading}</h2>
   <p class="lead">{guide.intro}</p>
-  <p class="lead">{guide.verifyNote}</p>
 
   <fieldset>
     <legend class="visually-hidden">Show only records of one type</legend>
@@ -128,9 +127,6 @@ const filterCss = guide.rows
   .lead {
     color: var(--muted);
     margin: 0.6em 0 0;
-  }
-  .lead + .lead {
-    margin-top: 0.4em;
   }
   fieldset {
     border: 0;

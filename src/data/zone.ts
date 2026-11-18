@@ -6,9 +6,8 @@ export const DEFAULT_TTL = 3600;
 
 export const profile = {
   name: "Kiril Rangelov",
-  tagline: "Platform engineer in the making and internet enthusiast.",
-  intro:
-    "I mostly do platform engineering, and I care about how the internet works underneath. So I introduce myself through my own DNS zone.",
+  tagline: "Student. I build platforms and dig into how the internet works.",
+  intro: "I care about how things work underneath, so I introduce myself through my own DNS zone.",
 };
 
 export const transfer = {

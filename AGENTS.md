@@ -94,13 +94,13 @@ There is no WHOIS block.
 ## Hero
 
 - `Kiril Rangelov` (h1, very large)
-- `Platform engineer in the making and internet enthusiast.` (large, bold)
-- One short line: `I mostly do platform engineering, and I care about how the internet works underneath. So I introduce myself through my own DNS zone.`
+- `Student. I build platforms and dig into how the internet works.` (large, bold)
+- One short line: `I care about how things work underneath, so I introduce myself through my own DNS zone.`
 - Keep the hero about me, not about DNS. The guide carries the DNS explanation.
 
 ## Guide (`src/data/guide.ts`)
 
-Heading `What the records mean`, then one line: `Each section below is a DNS record of rangelov.dev. Tap a record to open it, or tap a type to see only those.`
+Heading `What the records mean`, then one paragraph: `Each section below is a DNS record of rangelov.dev. Open a record to read it, or pick a type to filter. The verify button next to a record asks Quad9, a non-profit public DNS resolver, whether that record is published and validates with DNSSEC.`
 
 A list of rows. Each row is a button: type name in its type colour, what the
 record means in plain language, and what it holds on this page. Tapping a row
