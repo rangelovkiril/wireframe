@@ -1,6 +1,6 @@
 // DNS-over-HTTPS (RFC 8484, DNS wire format), usable at build time and in the
-// browser. Quad9 first, DNS4EU if Quad9 does not answer: both are European,
-// validate DNSSEC and allow requests from a web page (CORS).
+// browser. Quad9 first, DNS4EU if Quad9 does not answer in time: both are
+// European, validate DNSSEC and allow requests from a web page (CORS).
 
 export const RESOLVERS = [
   { name: "Quad9", url: "https://dns.quad9.net/dns-query", ip: "9.9.9.9" },
@@ -167,6 +167,8 @@ function parse(buf: Uint8Array, server: string): DohResponse {
   return { Status: flags & 0x0f, AD: (flags & 0x0020) !== 0, Answer, server };
 }
 
+const PER_RESOLVER_MS = 4000; // a slow resolver must leave time for the next one
+
 /** Ask the resolvers in turn; the first one that answers wins. */
 export async function resolve(name: string, type: QueryType, signal?: AbortSignal): Promise<DohResponse> {
   let last: unknown;
@@ -174,7 +176,7 @@ export async function resolve(name: string, type: QueryType, signal?: AbortSigna
     try {
       const res = await fetch(`${server.url}?dns=${b64url(query(name, type))}`, {
         headers: { accept: "application/dns-message" },
-        signal,
+        signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(PER_RESOLVER_MS)]) : AbortSignal.timeout(PER_RESOLVER_MS),
       });
       if (!res.ok) throw new Error(`${server.name}: HTTP ${res.status}`);
       return parse(new Uint8Array(await res.arrayBuffer()), server.name);

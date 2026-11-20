@@ -62,6 +62,9 @@ import { ui } from "../data/guide.ts";
       verdict.textContent = text;
       verdict.classList.toggle("ok", ok);
       explain.textContent = c ? ui.explain[c.verdict] : ui.explain.failed;
+      // check it yourself with the resolver that answered
+      const ip = RESOLVERS.find((r) => r.name === c?.server)?.ip ?? RESOLVERS[0].ip;
+      dig.textContent = `$ dig +dnssec ${type} ${name} @${ip}`;
       if (c?.lines.length) {
         answerTitle.textContent = ui.answer.replace("{server}", c.server);
         answer.textContent = c.lines.join("\n");

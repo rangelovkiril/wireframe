@@ -14,7 +14,7 @@ export interface GuideRow {
 export const guide = {
   heading: "What the records mean",
   intro:
-    "Each section below is a DNS record of rangelov.dev. Open a record to read it, or pick a type to filter. The verify button next to a record asks Quad9, a non-profit public DNS resolver, whether that record is published and validates with DNSSEC.",
+    "Each section below is a DNS record of rangelov.dev. Open a record to read it, or pick a type to filter. The verify button next to a record asks Quad9 or DNS4EU, two European public DNS resolvers, whether that record is published and validates with DNSSEC; the answer shows which one replied.",
   showAll: "Show all records",
   openAll: "Open all records",
   closeAll: "Close all records",

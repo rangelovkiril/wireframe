@@ -100,7 +100,7 @@ There is no WHOIS block.
 
 ## Guide (`src/data/guide.ts`)
 
-Heading `What the records mean`, then one paragraph: `Each section below is a DNS record of rangelov.dev. Open a record to read it, or pick a type to filter. The verify button next to a record asks Quad9, a non-profit public DNS resolver, whether that record is published and validates with DNSSEC.`
+Heading `What the records mean`, then one paragraph: `Each section below is a DNS record of rangelov.dev. Open a record to read it, or pick a type to filter. The verify button next to a record asks Quad9 or DNS4EU, two European public DNS resolvers, whether that record is published and validates with DNSSEC; the answer shows which one replied.`
 
 A list of rows. Each row is a button: type name in its type colour, what the
 record means in plain language, and what it holds on this page. Tapping a row
@@ -287,7 +287,8 @@ everything is still visible and readable.
    - deSEC doesn't allow public AXFR; the file is generated, and the panel
      shouldn't claim it came from a live transfer.
 3. **Live verify.** A small `verify` button per record. `lib/doh.ts` asks
-   Quad9 (`https://dns.quad9.net/dns-query`), then DNS4EU if Quad9 fails, in
+   Quad9 (`https://dns.quad9.net/dns-query`), then DNS4EU if Quad9 fails or
+   takes over 4 s (`https://unfiltered.joindns4.eu/dns-query`), in
    DNS wire format (RFC 8484, GET `?dns=`, DO bit set; both allow CORS). No
    Google: the site is about European infrastructure. Show `✓ live, signed`
    if it resolves with the AD flag, `✓ live` without AD, `not published yet`
@@ -295,7 +296,8 @@ everything is still visible and readable.
    `<dialog>` (`components/VerifyDialog.astro`): the verdict with a plain
    explanation, the raw answer from the resolver including the RRSIG, whether it
    matches the record on the page (TXT compared with its strings joined, SOA by
-   its names only), and the `dig +dnssec` command to check it yourself. The
+   its names only), and the `dig +dnssec` command to check it yourself (with the IP of the resolver
+   that answered). The
    result is shown only in the dialog, not under the record. The guide has one
    sentence saying what the verify button does.
 4. **Randomart at build time.** In `randomart.ts`, fetch the zone's DNSKEY
